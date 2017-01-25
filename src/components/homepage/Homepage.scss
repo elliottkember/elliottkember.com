@@ -1,105 +1,120 @@
 @import '~styles';
 
-.section {
-  font-family: 'Alegreya Sans';
-  font-weight: light;
+.border {
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   width: 100%;
-  height: 100vh;
-  padding: 60px 80px;
-
-  @include viewport(handset) {
-    font-size: 40px;
-  }
-
-  font-size: 50px;
-
-  @include viewport(tablet) {
-    font-size: 60px;
-  }
-
-  @include viewport(desktop) {
-    font-size: 80px;
-  }
+  height: 100%;
+  border: 10px solid rgba(0, 0, 0, 0.4);
 }
 
-// Hello. I am Elliott
-.section:first-child {
-  font-weight: 300;
-  background: black;
-  color: white;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-
-  @include viewport(handset) {
-  }
-
-  @include viewport(tablet) {
-  }
-  @include viewport(desktop) {
-  }
-}
-
-// I make things.
-.section:nth-child(2) {
-  height: 50vh;
-}
-
-// Like software
-.section:nth-child(3) {
-
-}
-
-// and art
-.section:nth-child(4) {
-  background: black;
-  color: white;
-  text-align: right;
-}
-
-//and jokes
-.section:nth-child(5) {
-  color: black;
-  height: 60vh;
-}
-
-// I work at ueno.
-.section:nth-child(6) {
-  text-align: center;
-  height: 50vh;
-}
-
-// I have also ...
-.section:nth-child(7) {
-  height: 50vh;
-  position: relative;
-  &::after {
-    display: block;
-    content: '';
-    background: black;
-    position: absolute;
-    height: 50%;
+.sections {
+  .section {
+    font-family: 'Alegreya Sans';
+    font-weight: light;
     width: 100%;
-    top: 50%;
-    left: 0;
-    right: 0;
-    bottom: 0;
-  }
-  text-align: center;
-  @include viewport(handset) {
-    font-size: 20px;
-  }
-  font-size: 25px;
-  @include viewport(tablet) {
-    font-size: 30px;
-  }
-  @include viewport(desktop) {
-    font-size: 40px;
-  }
-}
+    height: 100vh;
+    padding: 60px 80px;
+    box-sizing: border-box;
 
-.section:nth-child(8) {
-  background: black;
-  color: white;
+    @include viewport(handset) {
+      font-size: 40px;
+    }
+
+    font-size: 50px;
+
+    @include viewport(tablet) {
+      font-size: 60px;
+    }
+
+    @include viewport(desktop) {
+      font-size: 80px;
+    }
+  }
+
+  // Hello. I am Elliott
+  .section:first-child {
+    font-weight: 300;
+    background: black;
+    color: white;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+
+    @include viewport(handset) {
+    }
+
+    @include viewport(tablet) {
+    }
+    @include viewport(desktop) {
+    }
+  }
+
+  // I make things.
+  .section:nth-child(2) {
+    height: 50vh;
+  }
+
+  // Like software
+  .section:nth-child(3) {
+
+  }
+
+  // and art
+  .section:nth-child(4) {
+    background: black;
+    color: white;
+    text-align: right;
+  }
+
+  //and jokes
+  .section:nth-child(5) {
+    color: black;
+    height: 60vh;
+  }
+
+  // I work at ueno.
+  .section:nth-child(6) {
+    text-align: center;
+    height: 50vh;
+  }
+
+  // I have also ...
+  .section:nth-child(7) {
+    height: 50vh;
+    position: relative;
+    &::after {
+      display: block;
+      content: '';
+      background: black;
+      position: absolute;
+      height: 50%;
+      width: 100%;
+      top: 50%;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+    text-align: center;
+    @include viewport(handset) {
+      font-size: 20px;
+    }
+    font-size: 25px;
+    @include viewport(tablet) {
+      font-size: 30px;
+    }
+    @include viewport(desktop) {
+      font-size: 40px;
+    }
+  }
+
+  .section:nth-child(8) {
+    background: black;
+    color: white;
+  }
 }
