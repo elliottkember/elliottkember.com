@@ -4,14 +4,21 @@
   font-family: 'Alegreya Sans';
   font-weight: light;
   width: 100%;
+  height: 100vh;
   padding: 60px 80px;
 
-  @include viewport(tablet) {
-    font-size: 80px;
+  @include viewport(handset) {
+    font-size: 40px;
   }
 
-  @include viewport(modbile) {
+  font-size: 50px;
+
+  @include viewport(tablet) {
     font-size: 60px;
+  }
+
+  @include viewport(desktop) {
+    font-size: 80px;
   }
 }
 
@@ -20,11 +27,23 @@
   font-weight: 300;
   background: black;
   color: white;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+
+  @include viewport(handset) {
+  }
+
+  @include viewport(tablet) {
+  }
+  @include viewport(desktop) {
+  }
 }
 
 // I make things.
 .section:nth-child(2) {
-
+  height: 50vh;
 }
 
 // Like software
@@ -47,4 +66,39 @@
 // I work at ueno.
 .section:nth-child(6) {
   text-align: center;
+  height: 50vh;
+}
+
+// I have also ...
+.section:nth-child(7) {
+  height: 50vh;
+  position: relative;
+  &::after {
+    display: block;
+    content: '';
+    background: black;
+    position: absolute;
+    height: 50%;
+    width: 100%;
+    top: 50%;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+  text-align: center;
+  @include viewport(handset) {
+    font-size: 20px;
+  }
+  font-size: 25px;
+  @include viewport(tablet) {
+    font-size: 30px;
+  }
+  @include viewport(desktop) {
+    font-size: 40px;
+  }
+}
+
+.section:nth-child(8) {
+  background: black;
+  color: white;
 }
