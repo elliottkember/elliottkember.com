@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
 import classnames from 'classnames';
 import s from './Homepage.scss';
 
@@ -6,10 +6,11 @@ export default class Homepage extends Component {
 
   render() {
     return (
-      <div className={classnames(this.props.className)}>
+      <div>
         <div className={classnames(s.section)}>
-          <p>hello</p>
-          <p>I am Elliott</p>
+          <p>hello <br />
+            I am Elliott
+          </p>
         </div>
 
         <div className={classnames(s.section)}>
@@ -37,8 +38,10 @@ export default class Homepage extends Component {
         </div>
 
         <div className={classnames(s.section)}>
-          <p>Talk to me</p>
-          <p>elliott.kember@gmail.com</p>
+          <p>
+            Talk to me<br />
+            elliott.kember@gmail.com
+          </p>
         </div>
       </div>
     );
