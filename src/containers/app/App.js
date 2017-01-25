@@ -5,7 +5,6 @@ import helmetDefaults from 'utils/helmet';
 import Link from 'react-router/lib/Link';
 import IndexLink from 'react-router/lib/IndexLink';
 import AppLayout, { Content } from 'components/app-layout';
-import Header from 'components/header';
 import Navigation from 'components/navigation';
 
 // Check if we should show devtool
@@ -34,13 +33,6 @@ export default class App extends Component {
     return (
       <AppLayout>
         <Helmet {...helmetDefaults} />
-        <Header>
-          <Navigation>
-            <IndexLink to="/">Home</IndexLink>
-            <Link to="/planets">Planets</Link>
-            <Link to="/about">About</Link>
-          </Navigation>
-        </Header>
 
         <Content>
           {children}

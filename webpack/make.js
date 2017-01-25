@@ -91,6 +91,11 @@ function make(conf) {
     loader: 'file-loader',
   };
 
+  loaders.file = {
+    test: /\.(ttf)$/,
+    loader: 'url-loader',
+  };
+
   loaders.svg = {
     test: /\.svg$/,
     loaders: ['react-svgdom-loader', 'svgo-loader'],

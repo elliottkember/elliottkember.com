@@ -1,0 +1,50 @@
+@import '~styles';
+
+.section {
+  font-family: 'Alegreya Sans';
+  font-weight: light;
+  width: 100%;
+  padding: 60px 80px;
+
+  @include viewport(tablet) {
+    font-size: 80px;
+  }
+
+  @include viewport(modbile) {
+    font-size: 60px;
+  }
+}
+
+// Hello. I am Elliott
+.section:first-child {
+  font-weight: 300;
+  background: black;
+  color: white;
+}
+
+// I make things.
+.section:nth-child(2) {
+
+}
+
+// Like software
+.section:nth-child(3) {
+
+}
+
+// and art
+.section:nth-child(4) {
+  background: black;
+  color: white;
+  text-align: right;
+}
+
+//and jokes
+.section:nth-child(5) {
+  color: black;
+}
+
+// I work at ueno.
+.section:nth-child(6) {
+  text-align: center;
+}

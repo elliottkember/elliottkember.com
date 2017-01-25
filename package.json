@@ -1,7 +1,7 @@
 {
   "name": "starter-kit",
   "version": "1.0.1",
-  "description": "Ueno. starter kit",
+  "description": "elliottkember.com",
   "engines": {
     "node": ">=6.0 <7",
     "npm": ">=3.8 <4"
@@ -28,7 +28,7 @@
     "starter-kit",
     "universal"
   ],
-  "author": "Ueno.",
+  "author": "Elliott Kember",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/ueno-llc/starter-kit/issues"
