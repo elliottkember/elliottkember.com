@@ -53,36 +53,82 @@
 
   // I make software.
   .section:nth-child(2) {
-    overflow: hidden;
+    //overflow: hidden;
     height: 50vh;
-
-    .leds {
-      .led {
-        height: 100%;
-        float: left;
-        background: black;
-      }
-      position: absolute;
-      top: -45px;
-      height: 25px;
-      width: 100vw;
-      left: 0px;
-    }
+    position: relative;
   }
 
   // and art
   .section:nth-child(3) {
     background: black;
     border: 11px solid #333;
-    border-bottom: none;
     color: white;
     text-align: right;
+
+    .leds {
+      width: 100vw;
+      left: 0px;
+      right: 0px;
+      position: absolute;
+
+      &:after {
+        content: '';
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #000;
+      }
+
+      &.firstLeds {
+        top: 0;
+        height: 25px;
+        right: 22px;
+        width: 100%;
+        &:after {
+          content: '';
+          display: block;
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 22px;
+          width: 100%;
+          bottom: -50px;
+          background: #000;
+        }
+      }
+
+      &.secondLeds {
+        bottom: 0;
+        right: 22px;
+        height: 25px;
+        width: 100%;
+        &:after {
+          content: '';
+          display: block;
+          position: absolute;
+          top: -50px;
+          left: 0;
+          right: 22px;
+          width: 100%;
+          bottom: 0;
+          background: #000;
+        }
+      }
+
+      .led {
+        height: 100%;
+        float: left;
+        background: black;
+      }
+    }
   }
 
   //and jokes
   .section:nth-child(4) {
     color: black;
-    border: 11px solid #333;
     border-bottom: none;
     height: 60vh;
   }
@@ -106,10 +152,10 @@
       border-top: none;
       position: absolute;
       height: 50%;
-      width: 100%;
+      width: calc(100% - 22px);
       top: 50%;
       left: 0;
-      right: 0;
+      right: 22px;
       bottom: 0;
     }
     text-align: center;
