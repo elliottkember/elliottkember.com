@@ -1,79 +1,88 @@
 <html>
-  <style>
-    /* http://meyerweb.com/eric/tools/css/reset/
-     v2.0 | 20110126
-     License: none (public domain)
-    */
-    html, body, div, span, applet, object, iframe,
-    h1, h2, h3, h4, h5, h6, p, blockquote, pre, a {
-    	margin: 0;
-    	padding: 0;
-    	border: 0;
-    	font-size: 100%;
-    	font: inherit;
-    	vertical-align: baseline;
-      line-height: 1;
-    }
-    body {
-      font-family: "Tisa Pro";
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    #card {
-      width: 340px;
-      height: 500px;
-      margin-top: 10%;
-      margin-bottom: 10%;
-      margin: 0 auto;
-      background: #f8f8f8;
-      text-align: center;
-      box-shadow:
-        0px 0px 80px rgba(0, 0, 0, 0.2),
-        1px 1px white inset;
-      color: #777;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      padding: 50px 10px;
-      box-sizing: border-box;
-      flex-direction: column;
-    }
-    #logo {
-      margin-bottom: 40px;
-      margin-top: 20px;
-    }
-    h1, h2, p {
-      margin: 10px 0;
-    }
-    h1 {
-      font-size: 40px;
-      font-weight: normal;
-      margin-top: 30px;
-      margin-bottom: 40px;
-    }
-    h2 {
-      font-weight: normal;
-      font-size: 18px;
-    }
-    a {
-      color: magenta;
-    }
-    svg {
-      overflow: auto;
-      padding: 10px;
-      fill: #fff;
-    }
-  </style>
+  <head>
+    <style>
+      /* http://meyerweb.com/eric/tools/css/reset/
+       v2.0 | 20110126
+       License: none (public domain)
+      */
+      html, body, div, span, applet, object, iframe,
+      h1, h2, h3, h4, h5, h6, p, blockquote, pre, a {
+      	margin: 0;
+      	padding: 0;
+      	border: 0;
+      	font-size: 100%;
+      	font: inherit;
+      	vertical-align: baseline;
+        line-height: 1;
+      }
+      body {
+        font-family: "ff-tisa-web-pro";
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #card {
+        width: 340px;
+        height: 500px;
+        margin-top: 10%;
+        margin-bottom: 10%;
+        margin: 0 auto;
+        background: #f8f8f8;
+        text-align: center;
+        box-shadow:
+          0px 0px 80px rgba(0, 0, 0, 0.2),
+          1px 1px white inset;
+        color: #777;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        padding: 50px 10px;
+        box-sizing: border-box;
+        flex-direction: column;
+      }
+      #logo {
+        margin-bottom: 40px;
+        margin-top: 20px;
+      }
+      h1, h2, p {
+        margin: 10px 0;
+      }
+      h1 {
+        font-size: 40px;
+        font-weight: normal;
+        margin-top: 30px;
+        margin-bottom: 40px;
+      }
+      h2 {
+        font-weight: normal;
+        font-size: 18px;
+      }
+      a {
+        color: magenta;
+      }
+      svg {
+        overflow: auto;
+        padding: 10px;
+        fill: #fff;
+      }
+      @media screen and (max-width: 980px) {
+        #card {
+          /*display: none !important;*/
+        }
+      }
+    </style>
 
-  <script>
-    window.location.origin === 'file://' && document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')
-  </script>
+    <meta name="viewport" content="width=600; height=900; initial-scale: 1;">
 
-  <script src="https://use.typekit.net/jgy1oco.js"></script>
-  <script>try{Typekit.load({ async: true });}catch(e){}</script>
+    <script>
+      window.location.origin === 'file://' && document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')
+    </script>
 
-  <body>
+    <script src="https://use.typekit.net/ydx2xry.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
+  </head>
+
+  <body class="tk-ff-tisa-web-pro">
     <div id="card">
       <svg id="logo" width="165px" height="165px" viewBox="0 0 165 165" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
         <defs></defs>
@@ -90,6 +99,16 @@
       </div>
     </div>
   </body>
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-6594483-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
   <script type="text/javascript">
     let hue = Math.random() * 255;
     const difference = 80;
@@ -101,7 +120,7 @@
       hue += 0.1;
       let first = `hsl(${hue}, ${s}, ${l})`;
       let second = `hsl(${hue + difference}, ${s}, ${l})`;
-      const logo = `hsl(${hue + difference - 45}, ${s}, ${l})`;
+      const logo = `hsl(${hue + difference - 45}, 80%, 70%)`;
       document.body.style.background =
         "linear-gradient(to bottom right, " + first + ", " + second + ")";
       a.forEach(a => { a.style.color = second; });
