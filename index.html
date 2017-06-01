@@ -1,0 +1,111 @@
+<html>
+  <style>
+    /* http://meyerweb.com/eric/tools/css/reset/
+     v2.0 | 20110126
+     License: none (public domain)
+    */
+    html, body, div, span, applet, object, iframe,
+    h1, h2, h3, h4, h5, h6, p, blockquote, pre, a {
+    	margin: 0;
+    	padding: 0;
+    	border: 0;
+    	font-size: 100%;
+    	font: inherit;
+    	vertical-align: baseline;
+      line-height: 1;
+    }
+    body {
+      font-family: "Tisa Pro";
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #card {
+      width: 340px;
+      height: 500px;
+      margin-top: 10%;
+      margin-bottom: 10%;
+      margin: 0 auto;
+      background: #f8f8f8;
+      text-align: center;
+      box-shadow:
+        0px 0px 80px rgba(0, 0, 0, 0.2),
+        1px 1px white inset;
+      color: #777;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      padding: 50px 10px;
+      box-sizing: border-box;
+      flex-direction: column;
+    }
+    #logo {
+      margin-bottom: 40px;
+      margin-top: 20px;
+    }
+    h1, h2, p {
+      margin: 10px 0;
+    }
+    h1 {
+      font-size: 40px;
+      font-weight: normal;
+      margin-top: 30px;
+      margin-bottom: 40px;
+    }
+    h2 {
+      font-weight: normal;
+      font-size: 18px;
+    }
+    a {
+      color: magenta;
+    }
+    svg {
+      overflow: auto;
+      padding: 10px;
+      fill: #fff;
+    }
+  </style>
+
+  <script>
+    window.location.origin === 'file://' && document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')
+  </script>
+
+  <script src="https://use.typekit.net/jgy1oco.js"></script>
+  <script>try{Typekit.load({ async: true });}catch(e){}</script>
+
+  <body>
+    <div id="card">
+      <svg id="logo" width="165px" height="165px" viewBox="0 0 165 165" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <defs></defs>
+        <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+          <g id="Artboard-8" transform="translate(-1074.000000, -426.000000)" fill="#868686">
+            <path d="M1126.66319,585.439425 C1126.08502,583.336518 1125.67972,581.006714 1125.4473,578.45 C1124.94729,572.949972 1124.6973,566.000042 1124.6973,557.6 L1124.6973,517.7 L1153.4973,495.2 L1198.7973,561.8 C1202.1815,566.707101 1204.92146,570.683614 1207.01721,573.72962 C1193.05878,584.555484 1175.53199,591 1156.5,591 C1145.97813,591 1135.91632,589.030266 1126.66319,585.439425 Z M1097.59626,566.263339 C1083.0005,551.381239 1074,530.991709 1074,508.5 C1074,485.986523 1083.01793,465.579297 1097.63865,450.693468 C1097.67775,452.815594 1097.6973,455.051103 1097.6973,457.4 L1097.6973,557.6 C1097.6973,560.68313 1097.66362,563.570906 1097.59626,566.263339 Z M1126.12151,431.772999 C1135.52314,428.04749 1145.77246,426 1156.5,426 C1172.19302,426 1186.86267,430.381624 1199.35227,437.988224 C1199.31765,438.058686 1199.28266,438.129278 1199.2473,438.2 C1197.54729,441.600017 1195.24731,445.199981 1192.3473,449 C1189.44728,452.800019 1186.09731,456.549981 1182.2973,460.25 C1178.49728,463.950018 1174.49732,467.499983 1170.2973,470.9 L1124.6973,508.1 L1124.6973,457.4 C1124.6973,448.999958 1124.94729,442.050027 1125.4473,436.55 C1125.60108,434.858328 1125.82582,433.265996 1126.12151,431.772999 Z M1210.94602,446.515682 C1228.14536,461.635246 1239,483.800004 1239,508.5 C1239,525.577608 1233.81109,541.443282 1224.92388,554.606416 L1173.2973,478.7 L1210.4973,446.9 C1210.64726,446.771458 1210.79684,446.643352 1210.94602,446.515682 Z" id="Combined-Shape"></path>
+          </g>
+        </g>
+      </svg>
+      <div id="contents">
+        <h1>Elliott Kember</h1>
+        <h2>Software developer / LED artist</h2>
+        <p>Senior Developer at <a href="http://ueno.co/">ueno.</a></p>
+      </div>
+    </div>
+  </body>
+  <script type="text/javascript">
+    let hue = Math.random() * 255;
+    const difference = 80;
+    const s = "100%";
+    const l = "80%";
+    const a = document.querySelectorAll('a');
+    const path = document.querySelectorAll('path');
+    setInterval(function() {
+      hue += 0.1;
+      let first = `hsl(${hue}, ${s}, ${l})`;
+      let second = `hsl(${hue + difference}, ${s}, ${l})`;
+      const logo = `hsl(${hue + difference - 45}, ${s}, ${l})`;
+      document.body.style.background =
+        "linear-gradient(to bottom right, " + first + ", " + second + ")";
+      a.forEach(a => { a.style.color = second; });
+      path.forEach(path => { path.style.fill = logo; });
+    }, 5);
+  </script>
+</html>
