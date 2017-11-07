@@ -20,6 +20,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        perspective: 500px;
       }
       #card {
         width: 340px;
@@ -39,6 +40,9 @@
         padding: 50px 10px;
         box-sizing: border-box;
         flex-direction: column;
+        z-index: 10;
+        transition: linear transform 0.2s;
+        will-change: transform;
       }
       #logo {
         margin-bottom: 40px;
@@ -80,13 +84,56 @@
         box-sizing: border-box;
       }
       #overlay {
-        opacity: 0.8;
+        opacity: 0.4;
         border: none;
         position: absolute;
         width: 100%;
         height: 100%;
         width: 240px;
         height: 240px;
+      }
+      #me {
+        background-image: url('me.jpg');
+        background-size: 100% 100%;
+      }
+      @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+        #me {
+          background-image: url('me2x.jpg');
+        }
+      }
+      @media (-webkit-min-device-pixel-ratio: 3), (min-resolution: 288dpi) {
+        #me {
+          background-image: url('me3x.jpg');
+        }
+      }
+      #card-overlay {
+        background: white;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 1;
+        content: '';
+        opacity: 0;
+        z-index: 10;
+        transition: linear opacity 0.2s;
+      }
+      #texture1 {
+        /*background: url('whirlpool.png');*/
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='hexagons' fill='rgba(255, 255, 255, 1)' fill-opacity='0.2' fill-rule='nonzero'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        transform-origin: center center;
+      }
+      #overlay-wrapper {
+        transition: linear transform 0.2s;
+      }
+      #card {
+        perspective: 400px;
       }
     </style>
 
@@ -98,18 +145,18 @@
 
     <script src="https://use.typekit.net/ydx2xry.js"></script>
     <script>try{Typekit.load({ async: true });}catch(e){}</script>
+    <link rel="image/x-icon" rel="shortcut icon" id="favicon"/>
+    <meta name = "viewport" content = "width=device-width">
   </head>
 
   <body class="tk-ff-tisa-web-pro">
+    <div id="texture1"></div>
     <div id="card">
-      <svg id="logo" width="165px" height="165px" viewBox="0 0 165 165" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-        <defs></defs>
-        <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-          <g id="Artboard-8" transform="translate(-1074.000000, -426.000000)" fill="#868686">
-            <path d="M1126.66319,585.439425 C1126.08502,583.336518 1125.67972,581.006714 1125.4473,578.45 C1124.94729,572.949972 1124.6973,566.000042 1124.6973,557.6 L1124.6973,517.7 L1153.4973,495.2 L1198.7973,561.8 C1202.1815,566.707101 1204.92146,570.683614 1207.01721,573.72962 C1193.05878,584.555484 1175.53199,591 1156.5,591 C1145.97813,591 1135.91632,589.030266 1126.66319,585.439425 Z M1097.59626,566.263339 C1083.0005,551.381239 1074,530.991709 1074,508.5 C1074,485.986523 1083.01793,465.579297 1097.63865,450.693468 C1097.67775,452.815594 1097.6973,455.051103 1097.6973,457.4 L1097.6973,557.6 C1097.6973,560.68313 1097.66362,563.570906 1097.59626,566.263339 Z M1126.12151,431.772999 C1135.52314,428.04749 1145.77246,426 1156.5,426 C1172.19302,426 1186.86267,430.381624 1199.35227,437.988224 C1199.31765,438.058686 1199.28266,438.129278 1199.2473,438.2 C1197.54729,441.600017 1195.24731,445.199981 1192.3473,449 C1189.44728,452.800019 1186.09731,456.549981 1182.2973,460.25 C1178.49728,463.950018 1174.49732,467.499983 1170.2973,470.9 L1124.6973,508.1 L1124.6973,457.4 C1124.6973,448.999958 1124.94729,442.050027 1125.4473,436.55 C1125.60108,434.858328 1125.82582,433.265996 1126.12151,431.772999 Z M1210.94602,446.515682 C1228.14536,461.635246 1239,483.800004 1239,508.5 C1239,525.577608 1233.81109,541.443282 1224.92388,554.606416 L1173.2973,478.7 L1210.4973,446.9 C1210.64726,446.771458 1210.79684,446.643352 1210.94602,446.515682 Z" id="Combined-Shape"></path>
-          </g>
-        </g>
-      </svg>
+      <div id="card-overlay"></div>
+      <div id="overlay-wrapper">
+        <div id="overlay"></div>
+        <div id="me"></div>
+      </div>
       <div id="contents">
         <h1>Elliott Kember</h1>
         <h2>Software developer / LED artist</h2>
@@ -118,55 +165,120 @@
     </div>
   </body>
   <script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
-  ga('create', 'UA-6594483-1', 'auto');
-  ga('send', 'pageview');
-
-</script>
+    ga('create', 'UA-6594483-1', 'auto');
+    ga('send', 'pageview');
+  </script>
   <script type="text/javascript">
-  var deg = 100;
-  var hue = Math.random() * 255;
-  const s = "100%";
-  const l = "80%";
-  const difference = 80;
-  const a = document.querySelectorAll('a');
-  const svg = document.querySelector('svg');
-  const overlay = document.querySelector('#overlay');
-  const path = document.querySelectorAll('path');
-  let change = 0;
-  let changeUp = true;
-  setInterval(function() {
-    hue += change;
-    deg += change;
 
-    if (changeUp) {
-      change += 0.001;
-      // change += 0
-      if (change > 1.2) {
-        changeUp = false;
-      }
-    } else {
-      change -= 0.001;
-      // change += 0
-      if (change < -1.2) {
-        changeUp = true;
-      }
-    }
+    const cardOverlay = document.getElementById('card-overlay');
+    const card = document.getElementById('card');
+    const me = document.getElementById('overlay-wrapper');
 
-    let first = `hsl(${hue}, ${s}, ${l})`;
-    let second = `hsl(${hue + difference}, ${s}, ${l})`;
-    const logo = `hsl(${hue + difference - 90}, ${s}, ${l})`;
-    const logoSecond = `hsl(${hue - 90}, ${s}, ${l})`;
-    document.body.style.background =
-      "linear-gradient(" + deg + "deg, " + first + ", " + second + ")";
-    overlay.style.background =
-      "linear-gradient(" + deg + "deg, " + logo + ", " + logoSecond + ")";
-    a.forEach(a => { a.style.color = second; });
-    path.forEach(path => { path.style.fill = logo; });
-  }, 5);
+    document.addEventListener('mousemove', function(e){
+      const x = e.clientX;
+      const y = e.clientY;
+      const boxX = card.offsetLeft;
+      const boxY = card.offsetTop;
+      const left = boxX - x;
+      const top = boxY - y;
+      const k = 100;
+      const transform = `rotateX(${top/k}deg) rotateY(${left/-k}deg)`;
+      card.style.transform = transform;
+      me.style.transform = `rotateX(${top/k}deg) rotateY(${left/-k}deg)`;
+      cardOverlay.style.opacity = top/k * 0.2 ;
+    });
+
+    var deg = 100;
+    var hue = Math.random() * 255;
+    const s = "100%";
+    const l = "80%";
+    const difference = 80;
+    const a = document.querySelectorAll('a');
+    const svg = document.querySelector('svg');
+    const path = document.querySelectorAll('path');
+    let change = 1;
+    let changeUp = true;
+    let f = document.getElementById('favicon');
+    let overlayWrapper = document.getElementById('overlay-wrapper');
+    var canvas = document.createElement('canvas');
+    canvas.width = 16;
+    canvas.height = 16;
+    var ctx = canvas.getContext('2d');
+    var img = new Image();
+    var grd = ctx.createLinearGradient(0, 0, 16, 16);
+
+    let first = 'white';
+    let second = 'white';
+
+    const changeMultiplier = 3;
+
+    setInterval(function() {
+      hue += change;
+      deg += change;
+
+      if (changeUp) {
+        change += 0.001 * changeMultiplier;
+        if (change > 1.5 * changeMultiplier) {
+          changeUp = false;
+        }
+      } else {
+        change -= 0.001  * changeMultiplier;
+        if (change < -1.5 * changeMultiplier) {
+          changeUp = true;
+        }
+      }
+
+      const sin = Math.abs(Math.sin(deg/180*Math.PI));
+      const cos = Math.abs(Math.cos(deg/180*Math.PI));
+
+      first = `hsl(${hue}, ${s}, ${l})`;
+      second = `hsl(${hue + difference}, ${s}, ${l})`;
+
+      const logo = `hsl(${hue + difference - 90}, ${s}, ${l})`;
+      const logoSecond = `hsl(${hue - 90}, ${s}, ${l})`;
+
+      document.body.style.background =
+        "linear-gradient(" + deg + "deg, " + first + ", " + second + ")";
+
+      document.body.style.boxShadow = `
+        ${cos}px ${sin}px ${sin * 100}px ${first} inset,
+        ${cos}px ${sin}px ${cos * 100}px ${second} inset
+      `;
+
+      card.style.boxShadow = `
+        ${cos}px ${sin}px 100px ${second},
+        ${cos}px ${sin}px 100px ${first}
+      `;
+
+      overlay.style.background =
+        "linear-gradient(" + deg + "deg, " + logo + ", " + logoSecond + ")";
+
+      overlayWrapper.style.boxShadow = `
+        ${cos}px ${sin}px ${sin * 20}px ${first},
+        ${cos}px ${sin}px ${cos * 20}px ${second}
+      `;
+
+      texture1.style.backgroundPosition = `${change * 100}px ${change * 100}px`;
+      texture1.style.opacity = cos * 0.4;
+
+      a.forEach(a => { a.style.color = second; });
+      path.forEach(path => { path.style.fill = logo; });
+      grd.addColorStop(0, first);
+      grd.addColorStop(1, second);
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, 16 + cos * 16, 16 + sin * 16);
+      var link = document.createElement('link');
+      link.type = 'image/x-icon';
+      link.rel = 'shortcut icon';
+      link.href = canvas.toDataURL("image/x-icon");
+      f.parentElement.removeChild(f);
+      document.getElementsByTagName('head')[0].appendChild(link);
+      f = link;
+    }, 20);
   </script>
 </html>
