@@ -1,0 +1,42 @@
+---
+import Base from '../layouts/Base.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import { getCollection } from 'astro:content';
+import { site } from '../site';
+import { Image } from 'astro:assets';
+import profile from '../assets/profile.jpg';
+
+const featured = (await getCollection('projects', ({ data }) => data.featured))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+<Base>
+  <section class="pt-24 pb-32">
+    <Image src={profile} alt={site.name} width={224} densities={[1, 2]} class="reveal in w-28 h-28 rounded-full object-cover object-top mb-10 ring-1 ring-line" />
+    <p class="reveal in text-accent text-sm tracking-widest uppercase mb-6">{site.role} · {site.location}</p>
+    <h1 class="reveal in font-display font-light text-5xl sm:text-7xl leading-[1.05] tracking-tight max-w-4xl text-balance">
+      {site.pitch}
+    </h1>
+    <div class="reveal in mt-12 flex gap-6 text-sm">
+      <a href="/projects" class="px-5 py-3 rounded-full bg-fg text-bg hover:bg-accent transition-colors">See my work</a>
+      <a href={`mailto:${site.email}`} class="px-5 py-3 rounded-full border border-line hover:border-fg transition-colors">Get in touch</a>
+    </div>
+  </section>
+
+  <section>
+    <div class="flex items-baseline justify-between mb-6">
+      <h2 class="font-display text-3xl">Selected work</h2>
+      <a href="/projects" class="text-sm text-muted hover:text-fg transition-colors">All projects →</a>
+    </div>
+    <div class="divide-y divide-line">
+      {featured.map((p) => <ProjectCard project={p} />)}
+    </div>
+  </section>
+
+  <section class="mt-32 grid md:grid-cols-[1fr_2fr] gap-8 reveal">
+    <h2 class="font-display text-3xl">About</h2>
+    <div class="prose">
+      <p>I'm a software engineer with a decade of experience shipping products across the stack — from pixel-level frontend polish to the infrastructure that keeps it running. I like small teams, sharp tools, and problems that reward taste.</p>
+      <p><a href="/about">More about me →</a></p>
+    </div>
+  </section>
+</Base>

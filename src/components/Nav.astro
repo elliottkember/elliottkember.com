@@ -1,0 +1,17 @@
+---
+import { site } from '../site';
+const path = Astro.url.pathname;
+const links = [
+  { href: '/projects', label: 'Projects' },
+  { href: '/about', label: 'About' },
+];
+---
+<header class="w-full max-w-5xl mx-auto px-6 sm:px-10 py-8 flex items-center justify-between">
+  <a href="/" class="font-display text-xl tracking-tight hover:text-accent transition-colors">{site.name}</a>
+  <nav class="flex gap-8 text-sm text-muted">
+    {links.map((l) => (
+      <a href={l.href} class:list={['hover:text-fg transition-colors', path.startsWith(l.href) && 'text-fg']}>{l.label}</a>
+    ))}
+    <a href={`mailto:${site.email}`} class="hover:text-fg transition-colors">Contact</a>
+  </nav>
+</header>

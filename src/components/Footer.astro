@@ -1,0 +1,11 @@
+---
+import { site } from '../site';
+---
+<footer class="w-full max-w-5xl mx-auto px-6 sm:px-10 py-12 mt-24 border-t border-line flex flex-col sm:flex-row gap-4 justify-between text-sm text-muted">
+  <p>© {new Date().getFullYear()} {site.name}</p>
+  <div class="flex gap-6">
+    <a href={site.links.github} class="hover:text-fg transition-colors">GitHub</a>
+    <a href={site.links.linkedin} class="hover:text-fg transition-colors">LinkedIn</a>
+    <a href={`mailto:${site.email}`} class="hover:text-fg transition-colors">Email</a>
+  </div>
+</footer>

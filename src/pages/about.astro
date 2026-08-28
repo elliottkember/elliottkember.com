@@ -1,0 +1,33 @@
+---
+import Base from '../layouts/Base.astro';
+import { site } from '../site';
+const experience = [
+  { period: '2020 — now', role: 'Staff Software Engineer', org: 'OpenSpace', note: 'Led the mobile team, building in React Native. Shipped hundreds of high-quality releases.' },
+  { period: '2018 — 2020', role: 'Staff Software Engineer', org: 'Clearbit', note: 'Full-stack software engineer' },
+  { period: '2016 — 2018', role: 'Technical Director', org: 'Ueno', note: 'Led the San Francisco engineering team' },
+  { period: '2015 — 2016', role: 'Prototype', org: 'Dropbox', note: 'Experimental product design for Dropbox and Mailbox' },
+];
+---
+<Base title="About" description={`About ${site.name}.`}>
+  <section class="pt-16 grid md:grid-cols-[1fr_2fr] gap-10">
+    <h1 class="font-display font-light text-5xl tracking-tight">About</h1>
+    <div class="prose">
+      <p>Replace this with your story: what you work on, what you care about, and what kind of problems you want next.</p>
+      <p>Currently based in {site.location}. Reach me at <a href={`mailto:${site.email}`}>{site.email}</a>.</p>
+    </div>
+  </section>
+  <section class="mt-24 grid md:grid-cols-[1fr_2fr] gap-10 reveal">
+    <h2 class="font-display text-3xl">Experience</h2>
+    <ol class="divide-y divide-line">
+      {experience.map((e) => (
+        <li class="py-6 grid sm:grid-cols-[8rem_1fr] gap-2">
+          <span class="text-sm text-muted tabular-nums">{e.period}</span>
+          <div>
+            <p class="font-medium">{e.role} · <span class="text-muted">{e.org}</span></p>
+            <p class="mt-1 text-muted">{e.note}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </section>
+</Base>

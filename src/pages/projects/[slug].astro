@@ -1,0 +1,28 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map((p) => ({ params: { slug: p.id }, props: { project: p } }));
+}
+const { project } = Astro.props;
+const { Content } = await render(project);
+const { title, summary, tags, date, repo, url } = project.data;
+---
+<Base title={title} description={summary}>
+  <article class="pt-16 max-w-2xl">
+    <a href="/projects" class="text-sm text-muted hover:text-fg transition-colors">← Projects</a>
+    <h1 class="mt-6 font-display font-light text-5xl tracking-tight text-balance">{title}</h1>
+    <p class="mt-4 text-lg text-muted">{summary}</p>
+    <div class="mt-6 flex flex-wrap items-center gap-4 text-sm text-muted">
+      <time>{date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}</time>
+      {url && <a href={url} class="text-accent hover:underline">Live site ↗</a>}
+      {repo && <a href={repo} class="text-accent hover:underline">Source ↗</a>}
+    </div>
+    <ul class="mt-4 flex flex-wrap gap-2">
+      {tags.map((t) => <li class="text-xs px-2 py-1 rounded-full border border-line text-muted">{t}</li>)}
+    </ul>
+    <div class="prose mt-12 border-t border-line pt-10"><Content /></div>
+  </article>
+</Base>
