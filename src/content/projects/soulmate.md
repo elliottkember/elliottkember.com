@@ -2,7 +2,8 @@
 title: Soulmate
 summary: Open-source LED firmware, hardware and apps for building and controlling addressable light installations.
 tags: [C++, ESP32, React Native]
-date: 2022-01-01
+date: 2016-01-01
+end: 2020-01-01
 featured: true
 url: https://soulmatelights.com
 ---

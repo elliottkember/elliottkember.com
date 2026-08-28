@@ -2,7 +2,8 @@
 title: Clearbit X
 summary: Clearbit's marketing intelligence product for identifying and acting on website visitors.
 tags: [React, TypeScript]
-date: 2019-01-01
+date: 2018-01-01
+end: 2020-01-01
 featured: true
 url: https://clearbit.com
 ---

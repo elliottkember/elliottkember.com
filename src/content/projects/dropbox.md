@@ -1,9 +1,10 @@
 ---
 title: Dropbox
-summary: Worked on Dropbox's mobile apps following the Mailbox acquisition.
-tags: [iOS]
+summary: Mobile engineer on Dropbox and Mailbox, the email app that popularised swipe-to-archive and snooze.
+tags: [iOS, Objective-C]
 date: 2014-01-01
-featured: false
+end: 2016-01-01
+featured: true
 url: https://www.dropbox.com
 ---
 

@@ -2,7 +2,7 @@
 title: OpenSpace
 summary: 360° capture and AI-powered documentation for construction sites.
 tags: [React Native, TypeScript]
-date: 2023-01-01
+date: 2020-01-01
 featured: true
 url: https://www.openspace.ai
 ---
