@@ -7,6 +7,18 @@ const experience = [
   { period: '2016 — 2018', role: 'Technical Director', org: 'Ueno', note: 'Led the San Francisco engineering team' },
   { period: '2015 — 2016', role: 'Prototype', org: 'Dropbox', note: 'Experimental product design for Dropbox and Mailbox' },
 ];
+const patents = [
+  {
+    period: '2024, 2025',
+    title: 'Rendering depth-based three-dimensional model with integrated image frames',
+    org: 'Open Space Labs',
+    note: 'Aligning a LIDAR-derived 3D model with a simultaneously captured image sequence, so selecting a location in the model surfaces the photograph taken there.',
+    grants: [
+      { number: 'US 11,922,591', url: 'https://patents.google.com/patent/US11922591B2/en' },
+      { number: 'US 12,249,037', url: 'https://patents.google.com/patent/US12249037B2/en' },
+    ],
+  },
+];
 ---
 <Base title="About" description={`About ${site.name}.`}>
   <section class="pt-16 grid md:grid-cols-[1fr_2fr] gap-10">
@@ -25,6 +37,25 @@ const experience = [
           <div>
             <p class="font-medium">{e.role} · <span class="text-muted">{e.org}</span></p>
             <p class="mt-1 text-muted">{e.note}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </section>
+  <section class="mt-24 grid md:grid-cols-[1fr_2fr] gap-10 reveal">
+    <h2 class="font-display text-3xl">Patents</h2>
+    <ol class="divide-y divide-line">
+      {patents.map((p) => (
+        <li class="py-6 grid sm:grid-cols-[8rem_1fr] gap-2">
+          <span class="text-sm text-muted tabular-nums">{p.period}</span>
+          <div>
+            <p class="font-medium">{p.title} · <span class="text-muted">{p.org}</span></p>
+            <p class="mt-1 text-muted">{p.note}</p>
+            <p class="mt-2 text-sm tabular-nums flex flex-wrap gap-x-4 gap-y-1">
+              {p.grants.map((g) => (
+                <a href={g.url} rel="noopener">{g.number}</a>
+              ))}
+            </p>
           </div>
         </li>
       ))}
