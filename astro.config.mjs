@@ -6,5 +6,6 @@ import sitemap from '@astrojs/sitemap';
 export default defineConfig({
   site: 'https://elliottkember.com',
   vite: { plugins: [tailwindcss()] },
-  integrations: [sitemap()],
+  // the homepage is a static page in public/ (the Lumen canvas site), so list it for the sitemap by hand
+  integrations: [sitemap({ customPages: ['https://elliottkember.com/'] })],
 });
