@@ -253,7 +253,7 @@ function cardFor(s, i) {
   if (s.key === 'contact') return `${ch}
     <h1>Say hello.</h1>
     <p>${person.bio}</p>
-    <div class="links">${person.links.map((l) => `<a href="${l.href}">${l.label}</a>`).join('')}<a href="/about">About</a></div>
+    <div class="links">${person.links.map((l) => `<a href="${l.href}">${l.label}</a>`).join('')}</div>
     <div class="foot"><span></span>${next}</div>`;
   const p = s.project;
   return `${ch}
