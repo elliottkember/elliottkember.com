@@ -6,6 +6,7 @@
   const CELL = 24, GAP = 2;
   const PINK = '#ff2d95', PINK_HEAD = '#ff7cc0', GREEN = '#2bff6b';
   const START_STEP = 110, MIN_STEP = 50; // ms per move; each fruit shaves a little off
+  const TURBO = 2.5; // hold shift to go this many times faster
   const FADE_MS = 45000; // time for the site to fade out completely, sooner the more you eat
   const DIRS = {
     arrowup: [0, -1], w: [0, -1], arrowdown: [0, 1], s: [0, 1],
@@ -49,7 +50,7 @@
       draw();
     }
 
-    let snake, dir, queue, fruit, score, best = 0, step, deadUntil = 0;
+    let snake, dir, queue, fruit, score, best = 0, step, deadUntil = 0, turbo = false;
     function reset() {
       const x = Math.floor(cols / 2), y = Math.floor(rows / 2);
       snake = [[x, y], [x - 1, y], [x - 2, y], [x - 3, y]];
@@ -88,14 +89,14 @@
       const dying = performance.now() < deadUntil;
       block(fruit, GREEN);
       snake.forEach((p, i) => block(p, dying && Math.floor(performance.now() / 120) % 2 ? 'transparent' : i ? PINK : PINK_HEAD));
-      hud.textContent = `Score ${score}${best > score ? ` · best ${best}` : ''} · esc to quit`;
+      hud.textContent = `Score ${score}${best > score ? ` · best ${best}` : ''} · ${turbo ? 'turbo!' : 'shift for turbo'} · esc to quit`;
     }
 
     const began = performance.now();
     let last = began, raf;
     function frame(now) {
       if (deadUntil && now >= deadUntil) { deadUntil = 0; reset(); }
-      if (!deadUntil && now - last >= step) { last = now; tick(); }
+      if (!deadUntil && now - last >= (turbo ? step / TURBO : step)) { last = now; tick(); }
       veil.style.opacity = Math.min(1, (now - began) / FADE_MS + best * 0.03);
       draw();
       raf = requestAnimationFrame(frame);
@@ -103,6 +104,7 @@
 
     function key(e) {
       const k = e.key.toLowerCase();
+      turbo = e.shiftKey;
       e.preventDefault(); e.stopImmediatePropagation(); // the page underneath shouldn't react while we play
       if (k === 'escape') return stop();
       const next = DIRS[k];
@@ -118,8 +120,16 @@
     const swallowed = ['wheel', 'touchmove', 'touchstart', 'touchend'];
     swallowed.forEach((t) => addEventListener(t, swallow, { capture: true, passive: false }));
 
+    // shift held = turbo; let go (or leave the window) to slow back down
+    const keyup = (e) => { turbo = e.shiftKey; };
+    const blur = () => { turbo = false; };
+    addEventListener('keyup', keyup, true);
+    addEventListener('blur', blur);
+
     function stop() {
       cancelAnimationFrame(raf);
+      removeEventListener('keyup', keyup, true);
+      removeEventListener('blur', blur);
       removeEventListener('resize', resize);
       swallowed.forEach((t) => removeEventListener(t, swallow, { capture: true }));
       canvas.remove(); hud.remove();
