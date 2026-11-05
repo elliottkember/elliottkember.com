@@ -1,0 +1,54 @@
+<!doctype html>
+<!-- Source for public/og.png (1200×630 social preview). Regenerate with: npm run og -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  :root {
+    --mono: "JetBrains Mono", "Berkeley Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --sans: "Inter", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
+    --led: hsl(200 100% 70%);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; background: #030305; color: #f2f2f4; }
+  body { position: relative; font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+
+  /* LED mosaic: a dot grid lit by a soft cyan bloom, echoing the homepage canvas */
+  .leds {
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle, hsl(200 100% 70%) 2.2px, transparent 2.8px);
+    background-size: 18px 18px; background-position: 9px 9px;
+    -webkit-mask-image: radial-gradient(ellipse 60% 75% at 82% 50%, rgba(0,0,0,.9), rgba(0,0,0,.25) 45%, transparent 75%);
+            mask-image: radial-gradient(ellipse 60% 75% at 82% 50%, rgba(0,0,0,.9), rgba(0,0,0,.25) 45%, transparent 75%);
+  }
+  .leds.dim { background-image: radial-gradient(circle, rgba(255,255,255,.07) 2px, transparent 2.6px); -webkit-mask-image: none; mask-image: none; }
+  .bloom { position: absolute; inset: 0; background: radial-gradient(ellipse 45% 60% at 82% 50%, hsl(200 100% 55% / .28), transparent 70%); }
+
+  .card {
+    position: absolute; left: 72px; top: 50%; translate: 0 -50%; width: 760px; padding: 52px 56px;
+    border-radius: 22px; background: rgba(7,7,10,.86); border: 1px solid rgba(255,255,255,.09);
+    box-shadow: 0 0 120px hsl(200 100% 50% / .18);
+  }
+  .mono { font-family: var(--mono); font-size: 17px; letter-spacing: .14em; text-transform: uppercase; }
+  .kicker { color: var(--led); text-shadow: 0 0 14px var(--led); }
+  h1 { margin-top: 22px; font-size: 92px; font-weight: 600; letter-spacing: -0.045em; line-height: 1; }
+  p { margin-top: 24px; font-size: 27px; line-height: 1.45; color: #b9b9c2; }
+  .tags { margin-top: 32px; display: flex; gap: 12px; }
+  .tags span { padding: 9px 14px; border-radius: 7px; background: rgba(255,255,255,.06); color: #e6e6ea; font-size: 15px; }
+  .url { position: absolute; right: 64px; bottom: 44px; color: #8a8a94; font-size: 16px; }
+  .url b { color: var(--led); font-weight: 500; }
+</style>
+</head>
+<body>
+  <div class="leds dim"></div>
+  <div class="bloom"></div>
+  <div class="leds"></div>
+  <div class="card">
+    <div class="mono kicker">● Software Engineer</div>
+    <h1>Elliott Kember</h1>
+    <p>I design and build fast, high-quality software for the web and mobile — and care about the details people feel but never see.</p>
+    <div class="tags mono"><span>Auckland, New Zealand</span></div>
+  </div>
+  <div class="url mono"><b>elliottkember</b>.com</div>
+</body>
+</html>
