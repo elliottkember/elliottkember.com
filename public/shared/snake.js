@@ -1,8 +1,8 @@
-// Easter egg: type the Konami code (↑ ↑ ↓ ↓ ← → B A) to play snake over the page.
+// Easter egg: type the Konami code (↑ ↑ ↓ ↓ ← → ← → B A) to play snake over the page.
 // A blocky remake of github.com/elliottkember/jSnake: the snake wraps around the edges,
 // and the site slowly fades away behind it until there's nothing left but the game.
 (() => {
-  const KONAMI = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'arrowright', 'b', 'a'];
+  const KONAMI = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'arrowright', 'arrowleft', 'arrowright', 'b', 'a'];
   const CELL = 24, GAP = 2;
   const PINK = '#ff2d95', PINK_HEAD = '#ff7cc0', GREEN = '#2bff6b';
   const START_STEP = 110, MIN_STEP = 50; // ms per move; each fruit shaves a little off
