@@ -1,8 +1,11 @@
 // Easter egg: type the Konami code (↑ ↑ ↓ ↓ ← → ← → B A) to play snake over the page.
+// On a phone, swipe the arrows and tap twice for B A; then swipe to steer and hold for turbo.
 // A blocky remake of github.com/elliottkember/jSnake: the snake wraps around the edges,
 // and the site slowly fades away behind it until there's nothing left but the game.
 (() => {
   const KONAMI = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'arrowright', 'arrowleft', 'arrowright', 'b', 'a'];
+  const TOUCH_KONAMI = [...KONAMI.slice(0, 8), 'tap', 'tap'];
+  const SWIPE = 30, STEER = 24, HOLD_MS = 220; // px for a swipe, px of drag per turn, ms held for turbo
   const CELL = 24, GAP = 2;
   const PINK = '#ff2d95', PINK_HEAD = '#ff7cc0', GREEN = '#2bff6b';
   const START_STEP = 110, MIN_STEP = 50; // ms per move; each fruit shaves a little off
@@ -16,12 +19,30 @@
   let typed = [];
   let game = null;
 
+  function press(k) {
+    typed = [...typed, k].slice(-KONAMI.length);
+    const t = typed.join();
+    if (t === KONAMI.join() || t === TOUCH_KONAMI.join()) { typed = []; game = start(); }
+  }
+  const typing = (e) => e.target.closest?.('input, textarea, select, [contenteditable]');
+
   addEventListener('keydown', (e) => {
     if (game) return game.key(e);
-    if (e.target.closest?.('input, textarea, [contenteditable]')) return;
-    typed = [...typed, e.key.toLowerCase()].slice(-KONAMI.length);
-    if (typed.join() === KONAMI.join()) { typed = []; game = start(); }
+    if (!typing(e)) press(e.key.toLowerCase());
   }, true);
+
+  // touch version of the code: each swipe is an arrow, each tap is a button
+  let touch0 = null;
+  addEventListener('touchstart', (e) => {
+    touch0 = game || e.touches.length > 1 || typing(e) ? null : { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }, { capture: true, passive: true });
+  addEventListener('touchend', (e) => {
+    if (game || !touch0) return;
+    const t = e.changedTouches[0], dx = t.clientX - touch0.x, dy = t.clientY - touch0.y;
+    touch0 = null;
+    if (Math.hypot(dx, dy) < SWIPE) return press('tap');
+    press(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'arrowright' : 'arrowleft') : (dy > 0 ? 'arrowdown' : 'arrowup'));
+  }, { capture: true, passive: true });
 
   function start() {
     const bg = getComputedStyle(document.body).backgroundColor;
@@ -37,6 +58,13 @@
     document.body.append(canvas);
     const hud = layer(`z-index:2147483647;inset:20px auto auto 50%;translate:-50% 0;white-space:nowrap;padding:6px 10px;border-radius:6px;background:#000;
       color:${PINK};font:11px/1.4 "JetBrains Mono",ui-monospace,Menlo,monospace;letter-spacing:.14em;text-transform:uppercase;pointer-events:none`);
+    const quit = document.createElement('button');
+    quit.textContent = '✕'; quit.setAttribute('aria-label', 'Quit snake');
+    quit.style.cssText = `position:fixed;z-index:2147483647;top:14px;right:14px;width:40px;height:40px;border:0;border-radius:50%;
+      background:#000;color:${PINK};font:16px/40px system-ui,sans-serif;cursor:pointer`;
+    quit.addEventListener('click', () => stop());
+    document.body.append(quit);
+    const touchy = matchMedia('(pointer: coarse)').matches;
     const ctx = canvas.getContext('2d');
 
     let cols, rows, ox, oy;
@@ -89,7 +117,8 @@
       const dying = performance.now() < deadUntil;
       block(fruit, GREEN);
       snake.forEach((p, i) => block(p, dying && Math.floor(performance.now() / 120) % 2 ? 'transparent' : i ? PINK : PINK_HEAD));
-      hud.textContent = `Score ${score}${best > score ? ` · best ${best}` : ''} · ${turbo ? 'turbo!' : 'shift for turbo'} · esc to quit`;
+      const hint = turbo ? 'turbo!' : touchy ? 'swipe · hold for turbo' : 'shift for turbo · esc to quit';
+      hud.textContent = `Score ${score}${best > score ? ` · best ${best}` : ''} · ${hint}`;
     }
 
     const began = performance.now();
@@ -107,17 +136,38 @@
       turbo = e.shiftKey;
       e.preventDefault(); e.stopImmediatePropagation(); // the page underneath shouldn't react while we play
       if (k === 'escape') return stop();
-      const next = DIRS[k];
-      if (!next) return;
+      if (DIRS[k]) turn(DIRS[k]);
+    }
+    function turn(next) {
       const prev = queue.at(-1) || dir;
       if (next[0] === -prev[0] && next[1] === -prev[1]) return; // can't reverse into yourself
       if (next[0] === prev[0] && next[1] === prev[1]) return;
       if (queue.length < 2) queue.push(next);
     }
 
-    // block the page from scrolling or paging behind the game
-    const swallow = (e) => { e.preventDefault(); e.stopImmediatePropagation(); };
-    const swallowed = ['wheel', 'touchmove', 'touchstart', 'touchend'];
+    // Touch: drag anywhere to steer — it turns mid-drag, so one long drag can turn several times.
+    // A finger held still means turbo. Everything is kept from the page behind (no scrolling or
+    // paging), except taps on the quit button.
+    let drag = null, hold;
+    function swallow(e) {
+      if (e.target === quit) return;
+      e.preventDefault(); e.stopImmediatePropagation();
+      if (!e.changedTouches) return; // wheel
+      const t = e.changedTouches[0];
+      if (e.type === 'touchstart') {
+        drag = { x: t.clientX, y: t.clientY };
+        clearTimeout(hold); hold = setTimeout(() => { turbo = true; }, HOLD_MS);
+      } else if (e.type === 'touchmove' && drag) {
+        const dx = t.clientX - drag.x, dy = t.clientY - drag.y;
+        if (Math.hypot(dx, dy) < STEER) return;
+        clearTimeout(hold);
+        turn(Math.abs(dx) > Math.abs(dy) ? [Math.sign(dx), 0] : [0, Math.sign(dy)]);
+        drag = { x: t.clientX, y: t.clientY };
+      } else if (!e.touches.length) { // last finger lifted
+        clearTimeout(hold); turbo = false; drag = null;
+      }
+    }
+    const swallowed = ['wheel', 'touchmove', 'touchstart', 'touchend', 'touchcancel'];
     swallowed.forEach((t) => addEventListener(t, swallow, { capture: true, passive: false }));
 
     // shift held = turbo; let go (or leave the window) to slow back down
@@ -132,7 +182,8 @@
       removeEventListener('blur', blur);
       removeEventListener('resize', resize);
       swallowed.forEach((t) => removeEventListener(t, swallow, { capture: true }));
-      canvas.remove(); hud.remove();
+      clearTimeout(hold);
+      canvas.remove(); hud.remove(); quit.remove();
       veil.style.transition = 'opacity .6s ease';
       veil.style.opacity = 0;
       setTimeout(() => veil.remove(), 600);

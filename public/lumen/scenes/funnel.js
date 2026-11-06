@@ -8,7 +8,7 @@ import { TOTAL, getSegment, gatesOf, passOf, summary, optionsOf } from '../../sh
 const HUE0 = 205, HUE1 = 300;
 
 export function createFunnelScene() {
-  let W = 1, H = 1, dpr = 1, cy = 0, h0 = 0, unit = 1, compact = false, span = [0.1, 0.9];
+  let W = 1, H = 1, dpr = 1, cy = 0, h0 = 0, unit = 1, compact = false, span = [0.1, 0.8], cardX = Infinity;
   let parts = [], spawnAcc = 0, rate = 200;
   let gates = [], live = [], seen = -1, name = '', isOr = false;
   let chips = []; // last frame's chip boxes, for hover and click
@@ -69,15 +69,18 @@ export function createFunnelScene() {
     const cw = W / dpr;
     unit = Math.max(0.6, W / 1440);
     compact = cw < 760; // matches the page's phone layout, where the card sits at the bottom
-    if (compact) span = [0.1, 0.9];
+    cardX = Infinity;
+    if (compact) span = [0.08, 0.74]; // the phone's chapter rail sits over the right edge
     else {
       // keep the gates in the gap between the side rail and the card, so they can be seen and clicked
       const rail = clamp(cw * 0.024, 16, 36) + 170, card = cw - clamp(cw * 0.05, 20, 96) - Math.min(560, cw * 0.48);
       const a = (rail + 60) / cw;
       span = [a, Math.min(0.9, Math.max((card - 80) / cw, a + 380 / cw))];
+      cardX = card * dpr;
     }
-    cy = compact ? H * 0.3 : H * 0.52;
-    h0 = compact ? H * 0.12 : Math.min(H * 0.3, W * 0.3);
+    // on phones the card covers the bottom half, so the funnel sits higher and slimmer
+    cy = compact ? H * 0.25 : H * 0.52;
+    h0 = compact ? H * 0.085 : Math.min(H * 0.3, W * 0.3);
     rate = 260 * Math.min(1.3, unit / dpr * 2);
     parts = [];
     sync(true);
@@ -216,6 +219,8 @@ export function createFunnelScene() {
     // gates: dashed line, rule chip above, count below — alternating sides when they're crowded
     const gap = live.length > 1 ? ((span[1] - span[0]) * W) / (live.length - 1) : Infinity;
     const stagger = gap < 150 * dpr;
+    const sx = Math.min(W - 120 * dpr, endX + W * 0.1);
+    const resultShown = !compact && sx < cardX - 90 * dpr;
     const next = [];
     for (const gt of gates) {
       if (gt.a < 0.01) continue;
@@ -236,8 +241,9 @@ export function createFunnelScene() {
       ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
       ctx.font = `500 ${13 * dpr}px ${MONO}`; spacing(ctx, 0.5 * dpr);
       const count = Math.round(gt.count * (1 + 0.004 * Math.sin(t * 1.3 + gt.i)));
-      ctx.fillStyle = 'rgba(255,255,255,.85)';
-      ctx.fillText(count.toLocaleString('en-US'), gx, countY);
+      const total = !resultShown && gt === lastGate; // this count is the segment's size: say so
+      ctx.fillStyle = total ? css(320, 95, 80) : 'rgba(255,255,255,.85)';
+      ctx.fillText(`${count.toLocaleString('en-US')}${total && !compact ? ' accounts' : ''}`, gx, countY);
       ctx.font = `${10 * dpr}px ${MONO}`; spacing(ctx, 1.4 * dpr);
       ctx.fillStyle = css(330, 80, 70, 0.7);
       ctx.fillText(`−${Math.round((1 - gt.pass) * 100)}%`, gx, countY + 16 * dpr);
@@ -257,10 +263,12 @@ export function createFunnelScene() {
       ctx.fillStyle = '#07060d'; ctx.fillRect((x0 + x1) / 2 - 16 * dpr, (a.y + b.y) / 2 - 7 * dpr, 32 * dpr, 14 * dpr);
       ctx.fillStyle = 'rgba(255,255,255,.4)'; ctx.fillText('AND', (x0 + x1) / 2, (a.y + b.y) / 2);
     }
-    // entry label
-    ctx.textAlign = 'start'; ctx.font = `${10 * dpr}px ${MONO}`; spacing(ctx, 1.6 * dpr);
-    ctx.fillStyle = 'rgba(255,255,255,.4)';
-    ctx.fillText(`ALL VISITORS · ${TOTAL.toLocaleString('en-US')}`, 20 * dpr, cy - h0 + 24 * dpr);
+    // entry label (no room for it on phones)
+    if (!compact) {
+      ctx.textAlign = 'start'; ctx.font = `${10 * dpr}px ${MONO}`; spacing(ctx, 1.6 * dpr);
+      ctx.fillStyle = 'rgba(255,255,255,.4)';
+      ctx.fillText(`ALL VISITORS · ${TOTAL.toLocaleString('en-US')}`, 20 * dpr, cy - h0 + 24 * dpr);
+    }
 
     // visitors
     ctx.globalCompositeOperation = 'lighter';
@@ -273,16 +281,16 @@ export function createFunnelScene() {
     ctx.globalCompositeOperation = 'source-over';
 
     // segment result
-    const sx = Math.min(W - 120 * dpr, endX + W * 0.1), sh = halfHeight(sx);
+    const sh = halfHeight(sx);
     const glow = ctx.createRadialGradient(sx, cy, 0, sx, cy, sh * 3);
     glow.addColorStop(0, css(320, 95, 65, 0.25)); glow.addColorStop(1, css(320, 95, 65, 0));
     ctx.fillStyle = glow; ctx.fillRect(sx - sh * 3, cy - sh * 3, sh * 6, sh * 6);
     ctx.textAlign = 'center'; ctx.font = `${10 * dpr}px ${MONO}`; spacing(ctx, 1.6 * dpr);
     ctx.fillStyle = css(320, 90, 75, 0.85);
-    if (!compact) ctx.fillText(`SEGMENT · ${name.toUpperCase()}`, sx, cy - sh - 22 * dpr);
+    if (resultShown) ctx.fillText(`SEGMENT · ${name.toUpperCase()}`, sx, cy - sh - 22 * dpr);
     ctx.font = `600 ${20 * dpr}px ${SANS}`; spacing(ctx, 0);
     ctx.fillStyle = '#fff';
-    if (!compact) ctx.fillText(`${Math.round(lastGate ? lastGate.count : TOTAL).toLocaleString('en-US')} accounts`, sx, cy + sh + 34 * dpr);
+    if (resultShown) ctx.fillText(`${Math.round(lastGate ? lastGate.count : TOTAL).toLocaleString('en-US')} accounts`, sx, cy + sh + 34 * dpr);
 
     const hc = chips.find((c) => c.id === hover);
     if (hc) dropdown(ctx, hc);
