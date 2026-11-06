@@ -1,11 +1,12 @@
 // Owns the canvas and swaps between per-project scenes with a circular reveal.
 // Runs in the worker (OffscreenCanvas) or on the main thread as a fallback.
-import { createLedScene } from './scenes/led.js?v=12';
-import { createFunnelScene } from './scenes/funnel.js?v=12';
-import { createSyncScene } from './scenes/sync.js?v=12';
-import { createSiteScene } from './scenes/site.js?v=12';
-import { createHomeScene } from './scenes/home.js?v=12';
-import { TAU, makeCanvas } from './scenes/util.js?v=12';
+import { createLedScene } from './scenes/led.js?v=13';
+import { createFunnelScene } from './scenes/funnel.js?v=13';
+import { createSyncScene } from './scenes/sync.js?v=13';
+import { createSiteScene } from './scenes/site.js?v=13';
+import { createHomeScene } from './scenes/home.js?v=13';
+import { TAU, makeCanvas } from './scenes/util.js?v=13';
+import { setSegment } from '../shared/segment.js?v=13';
 
 const factories = {
   intro: createHomeScene,
@@ -46,7 +47,10 @@ export function createHost(canvas) {
     },
     pointer(x, y, on) { pointer.x = x * dpr; pointer.y = y * dpr; pointer.target = on ? 1 : 0; },
     tilt(x, y) { pointer.tx = x; pointer.ty = y; },
-    // returns e.g. { navigate: 'soulmate' } when a scene wants to change page (home mosaic)
+    // the Clearbit X builder on the page changed the segment the funnel scene draws
+    segment(s) { setSegment(s); },
+    // returns e.g. { navigate: 'soulmate' } when a scene wants to change page (home mosaic),
+    // or { edit: id } when a funnel chip is clicked
     click(x, y) { return cur?.scene.click?.(x * dpr, y * dpr) ?? null; },
     frame(t, dt) {
       if (!cur) return;

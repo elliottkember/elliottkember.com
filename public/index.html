@@ -109,6 +109,64 @@
   .card .links { display: flex; gap: 22px; margin-top: 28px; }
   .card .links a { text-decoration: none; border-bottom: 1px solid var(--led); padding-bottom: 2px; }
 
+  /* ----- Clearbit X: tabs and a working segment builder that drives the funnel behind the card ----- */
+  .tabs { display: flex; gap: 22px; margin: 22px 0 16px; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .tabs button { all: unset; cursor: pointer; padding-bottom: 9px; margin-bottom: -1px; color: rgba(242,242,244,.45); border-bottom: 2px solid transparent; transition: color .2s; }
+  .tabs button:hover, .tabs button:focus-visible { color: #fff; }
+  .tabs button[aria-selected="true"] { color: #fff; border-color: var(--led); }
+  .card:has(.seg) h1 { font-size: clamp(32px, 3.4vw, 48px); margin: 14px 0 0; }
+  .seg-head { display: grid; gap: 2px; margin-bottom: 14px; }
+  .seg-name { all: unset; font-size: 17px; font-weight: 600; color: #fff; border-bottom: 1px dashed transparent; }
+  .seg-name:hover, .seg-name:focus { border-color: rgba(255,255,255,.25); }
+  .seg-count { font-size: 13px; color: rgba(242,242,244,.55); }
+  .seg-count b { color: var(--led); font-weight: 600; font-variant-numeric: tabular-nums; }
+  /* the card never outgrows the screen: only the rule list scrolls */
+  .card:has(.seg) { display: flex; flex-direction: column; max-height: calc(100vh - 150px); }
+  .seg { display: flex; flex-direction: column; min-height: 0; flex: 0 1 auto; }
+  .seg-scroll { min-height: 120px; overflow: auto; overscroll-behavior: contain; margin: 0 -10px; padding: 2px 10px 6px; }
+  .conj {
+    all: unset; cursor: pointer; font: 600 10px var(--mono); letter-spacing: .1em; text-transform: uppercase;
+    padding: 4px 8px; border-radius: 5px; background: hsl(var(--hue) 90% 65% / .18); color: var(--led);
+  }
+  .conj span { opacity: .6; margin-left: 2px; }
+  .conj:hover, .conj:focus-visible { background: hsl(var(--hue) 90% 65% / .3); }
+  .rows { display: grid; gap: 6px; margin: 6px 0 0 11px; padding: 4px 0 0 14px; border-left: 1px solid hsl(var(--hue) 90% 70% / .25); }
+  .row { position: relative; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 1.4fr) 26px; gap: 6px; align-items: center; border-radius: 8px; }
+  .row::before { content: ""; position: absolute; left: -14px; top: 16px; width: 9px; border-top: 1px solid hsl(var(--hue) 90% 70% / .25); }
+  .row.nested { display: block; padding: 10px 36px 10px 10px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07); border-radius: 10px; }
+  .row.nested > .del { position: absolute; top: 7px; right: 6px; }
+  .row select, .row input, .vals {
+    all: unset; box-sizing: border-box; min-width: 0; height: 32px; padding: 0 10px; border-radius: 7px;
+    background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.09);
+    font-size: 13px; color: #f2f2f4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .row select {
+    appearance: none; cursor: pointer; padding-right: 24px; line-height: 30px;
+    background: rgba(255,255,255,.05) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23999' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 9px center;
+  }
+  .row option { background: #15121f; color: #f2f2f4; }
+  .row select:hover, .vals:hover { border-color: rgba(255,255,255,.2); }
+  .row select:focus-visible, .row input:focus, .vals:focus-visible, .vals.open { border-color: hsl(var(--hue) 90% 70% / .7); }
+  .row input::placeholder { color: rgba(242,242,244,.35); }
+  .vals { cursor: pointer; display: flex; gap: 4px; align-items: center; padding: 0 5px; }
+  .pill { flex: none; font-size: 11.5px; padding: 2px 7px; border-radius: 4px; background: hsl(var(--hue) 90% 65% / .2); color: #fff; }
+  .ph { color: rgba(242,242,244,.4); padding-left: 5px; }
+  .del { all: unset; cursor: pointer; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 6px; color: rgba(242,242,244,.35); }
+  .del:hover, .del:focus-visible { color: #ff7a9a; background: rgba(255,122,154,.1); }
+  .opts { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 0 6px; }
+  .opts button { all: unset; cursor: pointer; font-size: 12.5px; padding: 5px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,.12); color: rgba(242,242,244,.7); }
+  .opts button i { font: normal 10px var(--mono); color: rgba(242,242,244,.4); margin-left: 3px; }
+  .opts button:hover, .opts button:focus-visible { border-color: rgba(255,255,255,.3); color: #fff; }
+  .opts button[aria-pressed="true"] { background: hsl(var(--hue) 90% 65% / .22); border-color: hsl(var(--hue) 90% 70% / .6); color: #fff; }
+  .adds { display: flex; gap: 16px; margin: 8px 0 2px 25px; }
+  .adds button { all: unset; cursor: pointer; font-size: 12.5px; color: var(--led); }
+  .adds button:hover, .adds button:focus-visible { text-decoration: underline; }
+  .adds button:disabled { opacity: .35; cursor: default; text-decoration: none; }
+  .empty { font-size: 13px; color: rgba(242,242,244,.45); padding: 4px 0; }
+  .seg-foot { display: flex; justify-content: space-between; gap: 12px; margin-top: 12px; color: rgba(242,242,244,.4); font-size: 10px; }
+  .seg-foot button { all: unset; cursor: pointer; color: rgba(242,242,244,.6); }
+  .seg-foot button:hover, .seg-foot button:focus-visible { color: #fff; }
+
   footer {
     position: fixed; bottom: 22px; left: 0; right: 0; display: flex; justify-content: space-between;
     padding: 0 clamp(20px, 3vw, 40px); color: rgba(255,255,255,.6); pointer-events: none;
@@ -130,6 +188,12 @@
     .card .foot { margin-top: 18px; }
     .card .go { padding: 10px 14px; }
     .readout span { display: none; }
+    .card:has(.seg) { max-height: 58vh; }
+    .card:has(.seg) h1 { font-size: 30px; margin-top: 10px; }
+    .tabs { margin: 14px 0 12px; }
+    .row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 26px; }
+    .row > :is(.vals, input, select[data-value]) { grid-column: 1 / 3; }
+    .seg-foot span { display: none; }
     footer { display: none; }
   }
 </style>
@@ -150,8 +214,9 @@
 
 <script type="module">
 // ?v= busts copies browsers cached before the server sent no-cache headers
-import { person, projects } from './shared/projects.js?v=12';
-import { tilt } from './shared/tilt.js?v=12';
+import { person, projects } from './shared/projects.js?v=13';
+import { tilt } from './shared/tilt.js?v=13';
+import { FIELDS, defaultSegment, countOf, setSegment } from './shared/segment.js?v=13';
 
 const stops = [
   { key: 'intro', label: 'Hello', hue: 200, prog: 'Mosaic' },
@@ -160,19 +225,28 @@ const stops = [
   { key: 'contact', label: 'Contact', hue: 330, prog: 'Pulse' },
 ];
 
+// Clearbit X segment: edited by the builder on that project's card, drawn by the funnel scene.
+// Remembered per browser so your segment is still there next visit.
+const SEG_KEY = 'ek.segment.v1';
+let seg = (() => {
+  try { const s = JSON.parse(localStorage.getItem(SEG_KEY)); if (s?.type === 'group' && Array.isArray(s.children)) return s; } catch {}
+  return defaultSegment();
+})();
+let clearbitTab = 'about', openVals = null; // openVals: the rule whose value list is expanded
+
 // ---------- Renderer: OffscreenCanvas in a worker if we can, main thread if we can't ----------
 const canvas = document.getElementById('leds');
 const dpr = Math.min(devicePixelRatio || 1, 2);
 let send;
 if (canvas.transferControlToOffscreen && typeof OffscreenCanvas !== 'undefined') {
   const off = canvas.transferControlToOffscreen();
-  const worker = new Worker(new URL('./lumen/scene-worker.js?v=12', import.meta.url), { type: 'module' });
+  const worker = new Worker(new URL('./lumen/scene-worker.js?v=13', import.meta.url), { type: 'module' });
   worker.postMessage({ type: 'init', canvas: off, w: innerWidth, h: innerHeight, dpr, scene: 'intro', hue: 200 }, [off]);
   send = (msg) => worker.postMessage(msg);
-  worker.onmessage = ({ data }) => data.navigate && navigateTo(data.navigate, data.x, data.y);
+  worker.onmessage = ({ data }) => { if (data.navigate) navigateTo(data.navigate, data.x, data.y); else if (data.edit) editRule(data.edit); };
   document.getElementById('engine').textContent = 'OffscreenCanvas · worker thread';
 } else {
-  const { createHost } = await import('./lumen/scene-host.js?v=12');
+  const { createHost } = await import('./lumen/scene-host.js?v=13');
   const host = createHost(canvas);
   host.resize(innerWidth, innerHeight, dpr);
   host.setScene('intro', 200);
@@ -181,10 +255,12 @@ if (canvas.transferControlToOffscreen && typeof OffscreenCanvas !== 'undefined')
   send = (m) => ({
     resize: () => host.resize(m.w, m.h, m.dpr), scene: () => host.setScene(m.scene, m.hue, m.x, m.y),
     pointer: () => host.pointer(m.x, m.y, m.on),
-    click: () => { const r = host.click(m.x, m.y); if (r?.navigate) navigateTo(r.navigate, m.x, m.y); }, tilt: () => host.tilt(m.x, m.y),
+    click: () => { const r = host.click(m.x, m.y); if (r?.navigate) navigateTo(r.navigate, m.x, m.y); else if (r?.edit) editRule(r.edit); },
+    tilt: () => host.tilt(m.x, m.y), segment: () => setSegment(m.segment),
   })[m.type]();
   document.getElementById('engine').textContent = 'Canvas 2D · main thread';
 }
+send({ type: 'segment', segment: structuredClone(seg) });
 addEventListener('resize', () => send({ type: 'resize', w: innerWidth, h: innerHeight, dpr }));
 tilt((s) => send({ type: 'tilt', x: s.x, y: s.y }));
 addEventListener('pointermove', (e) => send({ type: 'pointer', x: e.clientX, y: e.clientY, on: true }));
@@ -264,18 +340,161 @@ function cardFor(s, i) {
     <p>${person.bio}</p>
     <div class="links">${person.links.map((l) => `<a href="${l.href}">${l.label}</a>`).join('')}</div>
     <div class="foot"><span></span>${next}</div>`;
-  const p = s.project;
+  const p = s.project, builder = s.key === 'clearbit-x', editing = builder && clearbitTab === 'edit';
+  const tabs = builder ? `<nav class="tabs mono" role="tablist">
+      <button role="tab" data-tab="about" aria-selected="${!editing}">What I did</button>
+      <button role="tab" data-tab="edit" aria-selected="${editing}">Segment builder</button>
+    </nav>` : '';
   return `${ch}
     <h1>${p.title}</h1>
-    <p>${p.blurb}</p>
-    ${p.did?.length ? `<h2>What I did</h2>
+    ${editing ? '' : `<p>${p.blurb}</p>`}
+    ${tabs}
+    ${editing ? builderHTML() : `${p.did?.length ? `${builder ? '' : '<h2>What I did</h2>'}
     <ol>${p.did.map((d) => `<li>${d}</li>`).join('')}</ol>` : ''}
-    <ul>${p.tags.map((t) => `<li>${t}</li>`).join('')}</ul>
+    <ul>${p.tags.map((t) => `<li>${t}</li>`).join('')}</ul>`}
     <div class="foot"><span></span>${next}</div>`;
 }
-document.getElementById('card').addEventListener('click', (e) => {
-  if (e.target.closest('[data-next]')) go(active + 1, { origin: pointOf(e) });
-  else if (e.target.closest('[data-first]')) go(0, { origin: pointOf(e) });
+
+// ---------- Clearbit X segment builder ----------
+// A small take on the real one: And/Or groups of field · operator · value rules, one level of
+// nesting. Every edit goes to the funnel scene, which reshapes itself to match.
+const card = document.getElementById('card');
+const MAX_RULES = 6, MAX_GROUP = 4;
+const TRASH = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2.5 4.5h11M6.5 4.5V2.8h3v1.7M4 4.5l.7 8.7h6.6l.7-8.7"/></svg>';
+const esc = (v) => String(v).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const uid = () => Math.random().toString(36).slice(2, 9);
+
+function find(id, node = seg, parent = null) {
+  if (node.id === id) return { node, parent };
+  for (const c of node.children ?? []) { const r = find(id, c, node); if (r) return r; }
+  return null;
+}
+function ruleFor(id, field) {
+  const f = FIELDS[field], keys = Object.keys(f.values ?? {});
+  return { id, type: 'cond', field, op: 0, ...(f.kind === 'text' ? { text: '' } : f.kind === 'single' ? { value: keys[1] } : { values: [keys[0]] }) };
+}
+// a new rule picks a field its group isn't already using
+function newRule(group, field) {
+  const used = new Set(group.children.map((c) => c.field));
+  return ruleFor(uid(), field ?? Object.keys(FIELDS).find((k) => !used.has(k)) ?? 'industry');
+}
+
+function builderHTML() {
+  return `<div class="seg">
+    <div class="seg-head">
+      <input class="seg-name" data-name value="${esc(seg.name ?? '')}" placeholder="Untitled segment" maxlength="40" aria-label="Segment name">
+      <span class="seg-count" aria-live="polite"><b>${countOf(seg).toLocaleString('en-US')}</b> accounts in this segment, updated just now</span>
+    </div>
+    <div class="seg-scroll">${groupHTML(seg, true)}</div>
+    <div class="seg-foot mono"><span>Edits reshape the funnel behind this card</span><button data-reset>Reset</button></div>
+  </div>`;
+}
+function groupHTML(g, root) {
+  const rows = g.children.map((c) => c.type === 'group'
+    ? `<div class="row nested" data-id="${c.id}">${groupHTML(c, false)}<button class="del" data-del="${c.id}" aria-label="Remove group">${TRASH}</button></div>`
+    : ruleHTML(c)).join('');
+  const full = g.children.length >= (root ? MAX_RULES : MAX_GROUP);
+  return `<div class="grp">
+    <button class="conj" data-conj="${g.id}" title="Match all of these (and) or any of them (or)">${g.op === 'or' ? 'Or' : 'And'}<span>▾</span></button>
+    <div class="rows">${rows || '<p class="empty">No rules yet, so everyone matches.</p>'}</div>
+    <div class="adds"><button data-add="${g.id}"${full ? ' disabled' : ''}>+ Add condition</button>${root ? `<button data-add-group${full ? ' disabled' : ''}>⊕ Add group</button>` : ''}</div>
+  </div>`;
+}
+function ruleHTML(c) {
+  const f = FIELDS[c.field], open = openVals === c.id;
+  const field = `<select data-field="${c.id}" aria-label="Field">${Object.entries(FIELDS).map(([k, v]) => `<option value="${k}"${k === c.field ? ' selected' : ''}>${v.label}</option>`).join('')}</select>`;
+  const op = `<select data-op="${c.id}" aria-label="Operator">${f.ops.map((o, i) => `<option value="${i}"${i === c.op ? ' selected' : ''}>${o}</option>`).join('')}</select>`;
+  let value, opts = '';
+  if (f.kind === 'text') value = `<input data-text="${c.id}" value="${esc(c.text ?? '')}" placeholder="e.g. growth" aria-label="Value">`;
+  else if (f.kind === 'single') value = `<select data-value="${c.id}" aria-label="Value">${Object.keys(f.values).map((v) => `<option${v === c.value ? ' selected' : ''}>${v}</option>`).join('')}</select>`;
+  else {
+    value = `<button class="vals${open ? ' open' : ''}" data-vals="${c.id}" aria-expanded="${open}" aria-label="Values">${c.values.length ? c.values.map((v) => `<span class="pill">${esc(v)}</span>`).join('') : '<span class="ph">Choose…</span>'}</button>`;
+    if (open) opts = `<div class="opts">${Object.entries(f.values).map(([v, p]) => `<button data-toggle="${c.id}" data-v="${esc(v)}" aria-pressed="${c.values.includes(v)}">${esc(v)}<i>${Math.round(p * 100)}%</i></button>`).join('')}</div>`;
+  }
+  return `<div class="row" data-id="${c.id}">${field}${op}${value}<button class="del" data-del="${c.id}" aria-label="Remove condition">${TRASH}</button>${opts}</div>`;
+}
+
+// Redraw the builder in place, keeping its scroll position and keyboard focus.
+function renderBuilder() {
+  const el = card.querySelector('.seg');
+  if (!el) return;
+  const top = el.querySelector('.seg-scroll').scrollTop, a = document.activeElement;
+  let refocus = null;
+  if (a && el.contains(a)) {
+    const attr = [...a.attributes].find((x) => /^data-(field|op|value|text|vals|toggle|conj|add|add-group|reset|name)$/.test(x.name));
+    if (attr) refocus = `[${attr.name}="${CSS.escape(attr.value)}"]${a.dataset.v ? `[data-v="${CSS.escape(a.dataset.v)}"]` : ''}`;
+  }
+  el.outerHTML = builderHTML();
+  card.querySelector('.seg-scroll').scrollTop = top;
+  if (refocus) card.querySelector(refocus)?.focus();
+}
+function segChanged({ redraw = true } = {}) {
+  send({ type: 'segment', segment: structuredClone(seg) });
+  try { localStorage.setItem(SEG_KEY, JSON.stringify(seg)); } catch {}
+  if (redraw) renderBuilder();
+  else { const b = card.querySelector('.seg-count b'); if (b) b.textContent = countOf(seg).toLocaleString('en-US'); }
+}
+
+// clicking a chip in the funnel opens that rule here
+function editRule(id) {
+  if (stops[active]?.key !== 'clearbit-x') return;
+  const n = find(id)?.node;
+  clearbitTab = 'edit';
+  openVals = n?.type === 'cond' && FIELDS[n.field].kind === 'multi' ? id : null;
+  card.innerHTML = cardFor(stops[active], active);
+  const row = card.querySelector(`.row[data-id="${CSS.escape(id)}"]`);
+  if (!row) return;
+  row.scrollIntoView({ block: 'nearest' });
+  row.animate([{ boxShadow: '0 0 0 2px hsl(var(--hue) 90% 70% / .9)' }, { boxShadow: '0 0 0 2px hsl(var(--hue) 90% 70% / 0)' }], { duration: 1400, easing: 'ease-out' });
+}
+
+card.addEventListener('click', (e) => {
+  const at = (sel) => e.target.closest(sel);
+  let el;
+  if (at('[data-next]')) go(active + 1, { origin: pointOf(e) });
+  else if (at('[data-first]')) go(0, { origin: pointOf(e) });
+  else if ((el = at('[data-tab]'))) { clearbitTab = el.dataset.tab; card.innerHTML = cardFor(stops[active], active); card.querySelector(`[data-tab="${clearbitTab}"]`)?.focus(); }
+  else if ((el = at('[data-conj]'))) { const g = find(el.dataset.conj).node; g.op = g.op === 'or' ? 'and' : 'or'; segChanged(); }
+  else if ((el = at('[data-add]'))) {
+    const g = find(el.dataset.add).node, r = newRule(g);
+    g.children.push(r);
+    openVals = FIELDS[r.field].kind === 'multi' ? r.id : null;
+    segChanged();
+    card.querySelector(`.row[data-id="${r.id}"]`)?.scrollIntoView({ block: 'nearest' });
+  } else if (at('[data-add-group]')) {
+    const g = { id: uid(), type: 'group', op: 'or', children: [] };
+    g.children.push(newRule(g, 'industry'), newRule(g, 'tech'));
+    seg.children.push(g);
+    openVals = null;
+    segChanged();
+    card.querySelector(`.row[data-id="${g.id}"]`)?.scrollIntoView({ block: 'nearest' });
+  } else if ((el = at('[data-del]'))) {
+    const { node, parent } = find(el.dataset.del);
+    parent.children = parent.children.filter((c) => c !== node);
+    if (parent !== seg && !parent.children.length) seg.children = seg.children.filter((c) => c !== parent); // drop emptied groups
+    segChanged();
+  } else if ((el = at('[data-vals]'))) { openVals = openVals === el.dataset.vals ? null : el.dataset.vals; renderBuilder(); }
+  else if ((el = at('[data-toggle]'))) {
+    const r = find(el.dataset.toggle).node, v = el.dataset.v, has = r.values.includes(v);
+    r.values = Object.keys(FIELDS[r.field].values).filter((k) => (k === v ? !has : r.values.includes(k)));
+    segChanged();
+  } else if (at('[data-reset]')) { seg = defaultSegment(); openVals = null; segChanged(); }
+});
+card.addEventListener('change', (e) => {
+  const d = e.target.dataset;
+  if (d.field) {
+    const r = find(d.field).node, fresh = ruleFor(r.id, e.target.value); // same id, so its funnel gate glides rather than jumps
+    for (const k of Object.keys(r)) delete r[k];
+    Object.assign(r, fresh);
+    openVals = FIELDS[r.field].kind === 'multi' ? r.id : null;
+    segChanged();
+  } else if (d.op) { find(d.op).node.op = +e.target.value; segChanged(); }
+  else if (d.value) { find(d.value).node.value = e.target.value; segChanged(); }
+});
+card.addEventListener('input', (e) => {
+  const d = e.target.dataset;
+  if (d.text) { find(d.text).node.text = e.target.value; segChanged({ redraw: false }); }
+  else if ('name' in d) { seg.name = e.target.value; segChanged({ redraw: false }); }
 });
 
 // wheel: one step per gesture. A trackpad flick keeps firing momentum events for a second or more,
@@ -285,6 +504,8 @@ addEventListener('wheel', (e) => {
   clearTimeout(quiet);
   quiet = setTimeout(() => { wheelLocked = false; acc = 0; }, 220);
   if (wheelLocked) return;
+  const sc = e.target.closest?.('.seg-scroll');
+  if (sc && sc.scrollHeight > sc.clientHeight + 1) return; // let the builder scroll instead
   acc += e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? innerHeight : 1); // lines/pages → px
   if (Math.abs(acc) > 30) {
     go(active + Math.sign(acc), { origin: pointOf(e) });
@@ -294,16 +515,17 @@ addEventListener('wheel', (e) => {
 
 // swipe up/down anywhere to move between entries
 let touch0 = null;
-addEventListener('touchstart', (e) => { const t = e.touches[0]; touch0 = { x: t.clientX, y: t.clientY, at: performance.now() }; }, { passive: true });
+addEventListener('touchstart', (e) => { const t = e.touches[0]; if (e.target.closest?.('.seg-scroll')) { touch0 = null; return; } touch0 = { x: t.clientX, y: t.clientY, at: performance.now() }; }, { passive: true });
 addEventListener('touchend', (e) => {
   if (!touch0) return;
   const t = e.changedTouches[0], dx = t.clientX - touch0.x, dy = t.clientY - touch0.y;
   if (Math.abs(dy) > 50 && Math.abs(dy) > Math.abs(dx) * 1.3 && performance.now() - touch0.at < 800) go(active + (dy < 0 ? 1 : -1), { origin: { x: t.clientX, y: t.clientY } });
   touch0 = null;
 }, { passive: true });
-document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false }); // no rubber-band scrolling
+document.addEventListener('touchmove', (e) => { if (!e.target.closest?.('.seg-scroll')) e.preventDefault(); }, { passive: false }); // no rubber-band scrolling, except in the builder
 
 addEventListener('keydown', (e) => {
+  if (e.target.closest?.('input, select, textarea')) return; // typing in the segment builder
   if (['ArrowDown', 'ArrowRight', 'j'].includes(e.key)) go(active + 1);
   else if (['ArrowUp', 'ArrowLeft', 'k'].includes(e.key)) go(active - 1);
   else if (/^[0-5]$/.test(e.key)) go(+e.key);

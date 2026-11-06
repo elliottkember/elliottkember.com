@@ -1,66 +1,107 @@
-// Clearbit X — visitors stream through a segment builder. Each filter is a gate in a
-// funnel: dots that fail a rule peel off through the wall, the rest narrow into a segment.
-import { TAU, clamp, smoothstep, hash, css, begin, spacing, MONO, SANS } from './util.js';
+// Clearbit X — visitors stream through a segment builder. Each top-level rule is a gate in a
+// funnel: dots that fail a rule peel off through the wall, the rest narrow into the segment.
+// The rules come from the builder on the homepage card (shared/segment.js), so edits reshape
+// the funnel live: gates slide into place, the walls ease in or out, the counts tick over.
+import { TAU, clamp, smoothstep, css, begin, spacing, MONO, SANS } from './util.js';
+import { TOTAL, getSegment, gatesOf, passOf, summary, optionsOf } from '../../shared/segment.js?v=13';
 
-const FILTERS = [
-  { field: 'Visited', op: '/pricing', short: '/pricing', pass: 0.55, options: ['/pricing', '/docs', '/careers', '/blog'] },
-  { field: 'Employees', op: '≥ 50', short: '≥ 50 staff', pass: 0.6, options: ['1–10', '11–50', '51–250', '250+'] },
-  { field: 'Industry', op: 'is SaaS', short: 'SaaS', pass: 0.62, options: ['SaaS', 'Fintech', 'Retail', 'Health'] },
-  { field: 'Country', op: 'US · UK · NZ', short: 'US·UK·NZ', pass: 0.72, options: ['United States', 'United Kingdom', 'New Zealand', 'Germany'] },
-  { field: 'Tech', op: 'uses Segment', short: 'Segment', pass: 0.7, options: ['Segment', 'Stripe', 'HubSpot', 'Salesforce'] },
-];
-const WIDE_GATES = [0.13, 0.26, 0.39, 0.52, 0.65], COMPACT_GATES = [0.12, 0.3, 0.48, 0.66, 0.84];
-let GATE_X = WIDE_GATES;
-const TOTAL = 48210;
 const HUE0 = 205, HUE1 = 300;
 
 export function createFunnelScene() {
-  let W = 1, H = 1, dpr = 1, cy = 0, h0 = 0, unit = 1, compact = false;
+  let W = 1, H = 1, dpr = 1, cy = 0, h0 = 0, unit = 1, compact = false, span = [0.1, 0.9];
   let parts = [], spawnAcc = 0, rate = 200;
-  const flash = FILTERS.map(() => 0);
-  const counts = [];
-  { let c = TOTAL; for (const f of FILTERS) { c = Math.round(c * f.pass); counts.push(c); } }
+  let gates = [], live = [], seen = -1, name = '', isOr = false;
+  let chips = []; // last frame's chip boxes, for hover and click
+
+  // Pick up a new segment from the page: keep gates that still exist (so they glide rather than
+  // jump), add new ones with open walls, and let removed ones fade and open back up.
+  function sync(snap = false) {
+    const seg = getSegment();
+    if (seg.version === seen && !snap) return;
+    seen = seg.version; name = seg.name?.trim() || 'Untitled segment'; isOr = seg.op === 'or';
+    const nodes = gatesOf(seg), n = nodes.length, [a, b] = span;
+    const old = new Map(gates.map((g) => [g.id, g]));
+    live = nodes.map((node, i) => {
+      const tx = n === 1 ? a + (b - a) * 0.4 : a + ((b - a) * i) / (n - 1);
+      let g = old.get(node.id);
+      old.delete(node.id);
+      if (!g) g = { id: node.id, x: tx, pass: 1, a: 0, flash: 0, count: TOTAL };
+      return Object.assign(g, { node, i, tx, tpass: passOf(node), ta: 1, live: true });
+    });
+    for (const g of old.values()) Object.assign(g, { tpass: 1, ta: 0, live: false });
+    gates = [...live, ...old.values()];
+    if (snap) for (const g of gates) { g.x = g.tx; g.pass = g.tpass; g.a = g.ta; }
+    for (const p of parts) if (!p.dead) p.fail = roll(p.x);
+  }
+
+  // Which gate ahead of x (if any) this visitor will fail.
+  function roll(x = -Infinity) {
+    for (const g of live) if (g.tx * W > x && Math.random() > g.tpass) return g.id;
+    return null;
+  }
+
+  function ease(dt) {
+    const k = 1 - Math.exp(-dt * 5);
+    for (const g of gates) {
+      g.x += (g.tx - g.x) * k; g.pass += (g.tpass - g.pass) * k; g.a += (g.ta - g.a) * k;
+      g.flash = Math.max(0, g.flash - dt * 3);
+    }
+    gates = gates.filter((g) => g.live || g.a > 0.02 || g.pass < 0.99);
+    let c = TOTAL;
+    for (const g of live) { c *= g.pass; g.count = c; }
+  }
 
   function halfHeight(x) {
-    const xf = x / W;
     let h = h0;
-    FILTERS.forEach((f, i) => { h *= 1 - (1 - Math.sqrt(f.pass)) * smoothstep(GATE_X[i], GATE_X[i] + 0.05, xf); });
+    for (const g of gates) h *= 1 - (1 - Math.sqrt(g.pass)) * smoothstep(g.x * W, g.x * W + 50 * dpr, x);
     return h;
   }
 
   function spawn(x = -10 * dpr, yn = Math.random() * 2 - 1) {
-    let fail = -1;
-    for (let i = 0; i < FILTERS.length; i++) if (Math.random() > FILTERS[i].pass) { fail = i; break; }
     return {
       x, yn, phase: Math.random() * TAU, v: (55 + Math.random() * 55) * unit,
-      fail, gate: 0, dead: false, y: 0, vy: 0, vx: 0, a: 1, size: (1.6 + Math.random() * 1.4) * dpr,
+      fail: roll(), dead: false, y: 0, vy: 0, vx: 0, a: 1, size: (1.6 + Math.random() * 1.4) * dpr,
     };
   }
 
   function resize(w, h, ratio) {
     W = w; H = h; dpr = ratio;
+    const cw = W / dpr;
     unit = Math.max(0.6, W / 1440);
-    compact = W / dpr < 700;
-    GATE_X = compact ? COMPACT_GATES : WIDE_GATES;
+    compact = cw < 760; // matches the page's phone layout, where the card sits at the bottom
+    if (compact) span = [0.1, 0.9];
+    else {
+      // keep the gates in the gap between the side rail and the card, so they can be seen and clicked
+      const rail = clamp(cw * 0.024, 16, 36) + 170, card = cw - clamp(cw * 0.05, 20, 96) - Math.min(560, cw * 0.48);
+      const a = (rail + 60) / cw;
+      span = [a, Math.min(0.9, Math.max((card - 80) / cw, a + 380 / cw))];
+    }
     cy = compact ? H * 0.3 : H * 0.52;
     h0 = compact ? H * 0.12 : Math.min(H * 0.3, W * 0.3);
     rate = 260 * Math.min(1.3, unit / dpr * 2);
     parts = [];
+    sync(true);
     const still = { x: -1e4, y: -1e4, on: 0 };
     for (let i = 0; i < 400; i++) step(i / 30, 1 / 30, still); // warm up to a steady flow
   }
 
+  const hit = (x, y) => chips.find((c) => x >= c.left && x <= c.left + c.w && Math.abs(y - c.y) <= c.hh / 2 + 4 * dpr);
+
   function click(x, y) {
+    const c = hit(x, y);
+    if (c) return { edit: c.id }; // the page opens this rule in the builder
     for (let i = 0; i < 120; i++) parts.push(spawn(-Math.random() * 60 * dpr, clamp((y - cy) / h0 + (Math.random() - 0.5) * 0.4, -1, 1)));
+    return null;
   }
 
-  function chip(ctx, x, y, f, active) {
+  function chip(ctx, x, y, s, active) {
     ctx.font = `500 ${11.5 * dpr}px ${SANS}`;
     spacing(ctx, 0);
-    const a = compact ? '' : f.field, b = compact ? f.short : ` ${f.op}`;
+    const value = s.value.length > 18 ? `${s.value.slice(0, 17)}…` : s.value;
+    const a = compact ? '' : s.field, b = compact ? value : ` ${value}`;
     const wa = ctx.measureText(a).width, wb = ctx.measureText(b).width;
     const pad = (compact ? 8 : 12) * dpr, w = wa + wb + pad * 2 + 16 * dpr, hh = (compact ? 24 : 28) * dpr;
-    const left = x - w / 2;
+    const left = clamp(x - w / 2, 8 * dpr, W - w - 8 * dpr);
     ctx.beginPath(); ctx.roundRect(left, y - hh / 2, w, hh, hh / 2);
     ctx.fillStyle = active ? 'rgba(40,30,70,.95)' : 'rgba(16,13,30,.9)'; ctx.fill();
     ctx.strokeStyle = css(265, 90, 70, active ? 0.9 : 0.35); ctx.lineWidth = dpr; ctx.stroke();
@@ -74,16 +115,20 @@ export function createFunnelScene() {
     return { left, w, hh };
   }
 
-  function dropdown(ctx, x, y, f) {
-    const w = 168 * dpr, row = 26 * dpr, h = row * f.options.length + 12 * dpr;
-    const left = x - w / 2;
+  // hovering a chip previews its rule, like the real builder's value dropdown
+  function dropdown(ctx, c) {
+    const lines = optionsOf(c.g.node);
+    ctx.font = `${11.5 * dpr}px ${SANS}`; spacing(ctx, 0);
+    const widest = Math.max(0, ...lines.map((l) => ctx.measureText(l.text).width));
+    const w = clamp(widest + 48 * dpr, 150 * dpr, 280 * dpr), row = 26 * dpr, h = row * lines.length + 34 * dpr;
+    const left = clamp(c.x - w / 2, 8 * dpr, W - w - 8 * dpr);
+    const y = c.below ? c.y - c.hh / 2 - 8 * dpr - h : c.y + c.hh / 2 + 8 * dpr;
     ctx.beginPath(); ctx.roundRect(left, y, w, h, 10 * dpr);
     ctx.fillStyle = 'rgba(20,16,36,.97)'; ctx.fill();
-    ctx.strokeStyle = 'rgba(255,255,255,.1)'; ctx.stroke();
-    ctx.font = `${11.5 * dpr}px ${SANS}`; ctx.textAlign = 'start'; ctx.textBaseline = 'middle';
-    f.options.forEach((o, i) => {
+    ctx.strokeStyle = 'rgba(255,255,255,.1)'; ctx.lineWidth = dpr; ctx.stroke();
+    ctx.textAlign = 'start'; ctx.textBaseline = 'middle';
+    lines.forEach(({ text, on }, i) => {
       const ry = y + 6 * dpr + i * row + row / 2;
-      const on = f.op.includes(o) || (f.field === 'Country' && i < 3) || (f.field === 'Employees' && i >= 2);
       ctx.beginPath(); ctx.roundRect(left + 12 * dpr, ry - 6 * dpr, 12 * dpr, 12 * dpr, 3 * dpr);
       ctx.fillStyle = on ? css(265, 90, 65) : 'transparent'; ctx.fill();
       ctx.strokeStyle = on ? css(265, 90, 65) : 'rgba(255,255,255,.3)'; ctx.stroke();
@@ -92,16 +137,23 @@ export function createFunnelScene() {
         ctx.beginPath(); ctx.moveTo(left + 15 * dpr, ry); ctx.lineTo(left + 17.5 * dpr, ry + 2.5 * dpr); ctx.lineTo(left + 21.5 * dpr, ry - 2.5 * dpr); ctx.stroke();
         ctx.lineWidth = dpr;
       }
+      ctx.font = `${11.5 * dpr}px ${SANS}`; spacing(ctx, 0);
       ctx.fillStyle = on ? '#fff' : 'rgba(255,255,255,.55)';
-      ctx.fillText(o, left + 32 * dpr, ry + 0.5 * dpr);
+      ctx.fillText(text, left + 32 * dpr, ry + 0.5 * dpr);
     });
+    ctx.font = `${9 * dpr}px ${MONO}`; spacing(ctx, 1.4 * dpr);
+    ctx.fillStyle = css(265, 90, 75, 0.8);
+    ctx.fillText('CLICK TO EDIT', left + 12 * dpr, y + h - 15 * dpr);
   }
 
   function step(t, dt, pointer) {
+    sync();
+    ease(dt);
     spawnAcc += rate * dt;
     while (spawnAcc >= 1) { parts.push(spawn(-Math.random() * 20 * dpr)); spawnAcc--; }
     for (const p of parts) {
       if (!p.dead) {
+        const px = p.x;
         p.x += p.v * dt * Math.max(0.4, 1 + (pointer.tx || 0) * 0.6);
         p.yn = clamp(p.yn + Math.sin(t * 1.7 + p.phase) * 0.15 * dt + (pointer.ty || 0) * 0.45 * dt, -0.95, 0.95);
         // cursor nudges the stream apart
@@ -109,13 +161,14 @@ export function createFunnelScene() {
         const dx = p.x - pointer.x, dy = ty - pointer.y, d2 = dx * dx + dy * dy, r = 70 * dpr;
         if (d2 < r * r) p.yn = clamp(p.yn + Math.sign(dy || 1) * (1 - Math.sqrt(d2) / r) * 2.5 * dt, -0.95, 0.95);
         p.y = cy + p.yn * halfHeight(p.x) * 0.92;
-        while (p.gate < FILTERS.length && p.x >= GATE_X[p.gate] * W) {
-          if (p.gate === p.fail) {
+        for (const g of live) {
+          const gx = g.x * W;
+          if (px >= gx || p.x < gx) continue; // only gates crossed this step
+          if (g.id === p.fail) {
             p.dead = true; p.vx = p.v * 0.35; p.vy = (p.yn >= 0 ? 1 : -1) * (30 + Math.random() * 60) * unit;
             break;
           }
-          flash[p.gate] = Math.min(1, flash[p.gate] + 0.04);
-          p.gate++;
+          g.flash = Math.min(1, g.flash + 0.04);
         }
       } else {
         p.x += p.vx * dt; p.y += p.vy * dt; p.vy *= 1 + dt * 1.2; p.a -= dt * 0.7;
@@ -126,7 +179,8 @@ export function createFunnelScene() {
 
   function draw(ctx, t, dt, pointer) {
     step(t, dt, pointer);
-    const endX = GATE_X[GATE_X.length - 1] * W;
+    const lastGate = live[live.length - 1];
+    const endX = (lastGate ? lastGate.x : span[1]) * W;
     begin(ctx, W, H, '#07060d');
 
     // dashboard dot grid
@@ -152,38 +206,49 @@ export function createFunnelScene() {
       ctx.stroke();
     }
 
-    // hovered gate opens its dropdown, like the real segment builder
-    let hover = -1;
-    if (pointer.on > 0.5) GATE_X.forEach((gx, i) => { if (Math.abs(pointer.x - gx * W) < 60 * dpr) hover = i; });
+    // hover: a chip, or the gate's dashed line through the funnel
+    let hover = null;
+    if (pointer.on > 0.5) {
+      hover = hit(pointer.x, pointer.y)?.id ?? null;
+      if (!hover) for (const c of chips) if (Math.abs(pointer.x - c.x) < 20 * dpr && Math.abs(pointer.y - cy) < halfHeight(c.x) + 10 * dpr) hover = c.id;
+    }
 
-    // gates: dashed line, rule chip above, count below
-    const chips = [];
-    FILTERS.forEach((f, i) => {
-      flash[i] = Math.max(0, flash[i] - dt * 3);
-      const gx = GATE_X[i] * W, h = halfHeight(gx - 1);
+    // gates: dashed line, rule chip above, count below — alternating sides when they're crowded
+    const gap = live.length > 1 ? ((span[1] - span[0]) * W) / (live.length - 1) : Infinity;
+    const stagger = gap < 150 * dpr;
+    const next = [];
+    for (const gt of gates) {
+      if (gt.a < 0.01) continue;
+      ctx.globalAlpha = clamp(gt.a);
+      const gx = gt.x * W, h = halfHeight(gx - 1), on = hover === gt.id;
       ctx.setLineDash([3 * dpr, 5 * dpr]);
-      ctx.strokeStyle = css(265, 90, 75, 0.25 + flash[i] * 0.5 + (hover === i ? 0.3 : 0));
+      ctx.strokeStyle = css(265, 90, 75, 0.25 + gt.flash * 0.5 + (on ? 0.3 : 0));
       ctx.lineWidth = dpr;
       ctx.beginPath(); ctx.moveTo(gx, cy - h - 18 * dpr); ctx.lineTo(gx, cy + h + 6 * dpr); ctx.stroke();
       ctx.setLineDash([]);
-      const below = compact && i % 2 === 1;
+      const below = stagger && gt.i % 2 === 1;
       const chipY = below ? cy + h + 30 * dpr : cy - h - (compact ? 30 : 34) * dpr;
-      chips.push({ ...chip(ctx, gx, chipY, f, hover === i), x: gx, y: chipY });
-      const countY = below ? cy - h - 32 * dpr : cy + h + 30 * dpr;
+      const box = chip(ctx, gx, chipY, summary(gt.node), on);
+      if (!gt.live) continue;
+      next.push({ ...box, x: gx, y: chipY, id: gt.id, below, g: gt });
 
+      const countY = below ? cy - h - 32 * dpr : cy + h + 30 * dpr;
       ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
       ctx.font = `500 ${13 * dpr}px ${MONO}`; spacing(ctx, 0.5 * dpr);
-      const live = Math.round(counts[i] * (1 + 0.004 * Math.sin(t * 1.3 + i)));
+      const count = Math.round(gt.count * (1 + 0.004 * Math.sin(t * 1.3 + gt.i)));
       ctx.fillStyle = 'rgba(255,255,255,.85)';
-      ctx.fillText(live.toLocaleString('en-US'), gx, countY);
+      ctx.fillText(count.toLocaleString('en-US'), gx, countY);
       ctx.font = `${10 * dpr}px ${MONO}`; spacing(ctx, 1.4 * dpr);
       ctx.fillStyle = css(330, 80, 70, 0.7);
-      ctx.fillText(`−${Math.round((1 - f.pass) * 100)}%`, gx, countY + 16 * dpr);
+      ctx.fillText(`−${Math.round((1 - gt.pass) * 100)}%`, gx, countY + 16 * dpr);
       ctx.textAlign = 'start';
-    });
+    }
+    ctx.globalAlpha = 1;
+    chips = next;
+
     // AND connectors between rule chips
     ctx.font = `600 ${9 * dpr}px ${MONO}`; spacing(ctx, 1.5 * dpr); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    for (let i = 0; i < (compact ? 0 : chips.length - 1); i++) {
+    for (let i = 0; i < (stagger || isOr ? 0 : chips.length - 1); i++) {
       const a = chips[i], b = chips[i + 1];
       const x0 = a.left + a.w, x1 = b.left;
       if (x1 - x0 < 30 * dpr) continue;
@@ -200,7 +265,7 @@ export function createFunnelScene() {
     // visitors
     ctx.globalCompositeOperation = 'lighter';
     for (const p of parts) {
-      const matched = p.gate === FILTERS.length;
+      const matched = !p.dead && lastGate && p.x >= lastGate.x * W;
       const hue = matched ? 320 : HUE0 + (HUE1 - HUE0) * clamp(p.x / endX) * 0.8;
       ctx.fillStyle = p.dead ? `rgba(150,150,170,${Math.max(0, p.a) * 0.35})` : css(hue, 95, matched ? 70 : 62, matched ? 0.95 : 0.75);
       ctx.beginPath(); ctx.arc(p.x, p.y, matched ? p.size * 1.3 : p.size, 0, TAU); ctx.fill();
@@ -214,12 +279,13 @@ export function createFunnelScene() {
     ctx.fillStyle = glow; ctx.fillRect(sx - sh * 3, cy - sh * 3, sh * 6, sh * 6);
     ctx.textAlign = 'center'; ctx.font = `${10 * dpr}px ${MONO}`; spacing(ctx, 1.6 * dpr);
     ctx.fillStyle = css(320, 90, 75, 0.85);
-    if (!compact) ctx.fillText('SEGMENT · HIGH-INTENT SAAS', sx, cy - sh - 22 * dpr);
+    if (!compact) ctx.fillText(`SEGMENT · ${name.toUpperCase()}`, sx, cy - sh - 22 * dpr);
     ctx.font = `600 ${20 * dpr}px ${SANS}`; spacing(ctx, 0);
     ctx.fillStyle = '#fff';
-    if (!compact) ctx.fillText(`${counts[counts.length - 1].toLocaleString('en-US')} accounts`, sx, cy + sh + 34 * dpr);
+    if (!compact) ctx.fillText(`${Math.round(lastGate ? lastGate.count : TOTAL).toLocaleString('en-US')} accounts`, sx, cy + sh + 34 * dpr);
 
-    if (hover >= 0) dropdown(ctx, chips[hover].x, chips[hover].y + chips[hover].hh / 2 + 8 * dpr, FILTERS[hover]);
+    const hc = chips.find((c) => c.id === hover);
+    if (hc) dropdown(ctx, hc);
   }
 
   return { resize, draw, click };

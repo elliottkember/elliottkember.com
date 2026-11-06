@@ -1,4 +1,4 @@
-import { createHost } from './scene-host.js?v=12';
+import { createHost } from './scene-host.js?v=13';
 
 let host, start = performance.now(), last = start;
 
@@ -22,6 +22,7 @@ onmessage = ({ data }) => {
     case 'scene': host.setScene(data.scene, data.hue, data.x, data.y); break;
     case 'pointer': host.pointer(data.x, data.y, data.on); break;
     case 'tilt': host.tilt(data.x, data.y); break;
-    case 'click': { const r = host.click(data.x, data.y); if (r?.navigate) postMessage({ ...r, x: data.x, y: data.y }); break; }
+    case 'segment': host.segment(data.segment); break;
+    case 'click': { const r = host.click(data.x, data.y); if (r) postMessage({ ...r, x: data.x, y: data.y }); break; }
   }
 };
