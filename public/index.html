@@ -135,6 +135,18 @@
   .row::before { content: ""; position: absolute; left: -14px; top: 16px; width: 9px; border-top: 1px solid hsl(var(--hue) 90% 70% / .25); }
   .row.nested { display: block; padding: 10px 36px 10px 10px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07); border-radius: 10px; }
   .row.nested > .del { position: absolute; top: 7px; right: 6px; }
+  @media (min-width: 761px) { .nested .row:not(.event) { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.2fr) 26px; } }
+  .row optgroup { background: #15121f; color: rgba(242,242,244,.5); font-style: normal; }
+  .has { background: hsl(var(--hue) 90% 65% / .06); border-color: hsl(var(--hue) 90% 70% / .2); }
+  .has-head { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; font-size: 13px; color: rgba(242,242,244,.55); }
+  .has-head select[data-neg] { flex: none; width: 82px; }
+  .has-head select[data-field] { flex: 1 1 auto; max-width: 200px; color: var(--led); }
+  .row.event { grid-template-columns: minmax(0, 1.25fr) minmax(0, 2.4fr) 26px; padding-bottom: 2px; }
+  .ev-line { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: rgba(242,242,244,.55); }
+  .ev-line select { flex: 0 1 auto; }
+  .ev-line input[type="number"] { width: 52px; flex: none; text-align: center; -moz-appearance: textfield; }
+  .ev-line input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .ev-line span { white-space: nowrap; }
   .row select, .row input, .vals {
     all: unset; box-sizing: border-box; min-width: 0; height: 32px; padding: 0 10px; border-radius: 7px;
     background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.09);
@@ -193,6 +205,9 @@
     .tabs { margin: 14px 0 12px; }
     .row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 26px; }
     .row > :is(.vals, input, select[data-value]) { grid-column: 1 / 3; }
+    .row.event { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 26px; }
+    .row.event > input { grid-column: auto; }
+    .ev-line { flex-wrap: wrap; }
     .seg-foot span { display: none; }
     footer { display: none; }
   }
@@ -214,9 +229,9 @@
 
 <script type="module">
 // ?v= busts copies browsers cached before the server sent no-cache headers
-import { person, projects } from './shared/projects.js?v=13';
-import { tilt } from './shared/tilt.js?v=13';
-import { FIELDS, defaultSegment, countOf, setSegment } from './shared/segment.js?v=13';
+import { person, projects } from './shared/projects.js?v=14';
+import { tilt } from './shared/tilt.js?v=14';
+import { FIELDS, RELATIONS, EVENTS, EVENT_OPS, WINDOWS, fieldsFor, defaultSegment, countOf, setSegment } from './shared/segment.js?v=14';
 
 const stops = [
   { key: 'intro', label: 'Hello', hue: 200, prog: 'Mosaic' },
@@ -227,7 +242,7 @@ const stops = [
 
 // Clearbit X segment: edited by the builder on that project's card, drawn by the funnel scene.
 // Remembered per browser so your segment is still there next visit.
-const SEG_KEY = 'ek.segment.v1';
+const SEG_KEY = 'ek.segment.v2'; // v2: rebuilt around the Clearbit Audiences sample
 let seg = (() => {
   try { const s = JSON.parse(localStorage.getItem(SEG_KEY)); if (s?.type === 'group' && Array.isArray(s.children)) return s; } catch {}
   return defaultSegment();
@@ -240,13 +255,13 @@ const dpr = Math.min(devicePixelRatio || 1, 2);
 let send;
 if (canvas.transferControlToOffscreen && typeof OffscreenCanvas !== 'undefined') {
   const off = canvas.transferControlToOffscreen();
-  const worker = new Worker(new URL('./lumen/scene-worker.js?v=13', import.meta.url), { type: 'module' });
+  const worker = new Worker(new URL('./lumen/scene-worker.js?v=14', import.meta.url), { type: 'module' });
   worker.postMessage({ type: 'init', canvas: off, w: innerWidth, h: innerHeight, dpr, scene: 'intro', hue: 200 }, [off]);
   send = (msg) => worker.postMessage(msg);
   worker.onmessage = ({ data }) => { if (data.navigate) navigateTo(data.navigate, data.x, data.y); else if (data.edit) editRule(data.edit); };
   document.getElementById('engine').textContent = 'OffscreenCanvas · worker thread';
 } else {
-  const { createHost } = await import('./lumen/scene-host.js?v=13');
+  const { createHost } = await import('./lumen/scene-host.js?v=14');
   const host = createHost(canvas);
   host.resize(innerWidth, innerHeight, dpr);
   host.setScene('intro', 200);
@@ -369,43 +384,79 @@ function find(id, node = seg, parent = null) {
   for (const c of node.children ?? []) { const r = find(id, c, node); if (r) return r; }
   return null;
 }
+// field is a FIELDS key, or 'rel:salesforce' for a "Has … where" block, or 'event:views' for an event row
 function ruleFor(id, field) {
+  if (field.startsWith('rel:')) {
+    const rel = field.slice(4), [first] = fieldsFor(rel);
+    return { id, type: 'has', rel, neg: 0, op: 'and', children: [ruleFor(uid(), first)] };
+  }
+  if (field.startsWith('event:')) return { id, type: 'event', event: field.slice(6), domain: 'clearbit.com', op: 0, min: 10, window: 'Month' };
   const f = FIELDS[field], keys = Object.keys(f.values ?? {});
-  return { id, type: 'cond', field, op: 0, ...(f.kind === 'text' ? { text: '' } : f.kind === 'single' ? { value: keys[1] } : { values: [keys[0]] }) };
+  return { id, type: 'cond', field, op: 0, ...(f.kind === 'text' ? { text: '' } : f.kind === 'single' ? { value: keys[1] } : f.kind === 'flag' ? {} : { values: [keys[0]] }) };
 }
 // a new rule picks a field its group isn't already using
 function newRule(group, field) {
-  const used = new Set(group.children.map((c) => c.field));
-  return ruleFor(uid(), field ?? Object.keys(FIELDS).find((k) => !used.has(k)) ?? 'industry');
+  const keys = fieldsFor(group.type === 'has' ? group.rel : null), used = new Set(group.children.map((c) => c.field));
+  return ruleFor(uid(), field ?? keys.find((k) => !used.has(k)) ?? keys[0]);
+}
+const fieldKey = (n) => (n.type === 'has' ? `rel:${n.rel}` : n.type === 'event' ? `event:${n.event}` : n.field);
+// the field picker, sectioned like Clearbit's. Inside a "Has" block it only offers that record's fields.
+function fieldSelect(n, rel) {
+  const opt = (v, label) => `<option value="${v}"${v === fieldKey(n) ? ' selected' : ''}>${label}</option>`;
+  const fields = (keys) => keys.map((k) => opt(k, FIELDS[k].label)).join('');
+  let html;
+  if (rel) html = fields(fieldsFor(rel));
+  else {
+    const groups = {};
+    for (const k of fieldsFor()) (groups[FIELDS[k].group] ??= []).push(k);
+    html = Object.entries(groups).map(([g, ks]) => `<optgroup label="${g}">${fields(ks)}</optgroup>`).join('')
+      + `<optgroup label="Related records">${Object.entries(RELATIONS).map(([k, r]) => opt(`rel:${k}`, r.label)).join('')}</optgroup>`
+      + `<optgroup label="Events">${Object.entries(EVENTS).map(([k, e]) => opt(`event:${k}`, e.label)).join('')}</optgroup>`;
+  }
+  return `<select data-field="${n.id}" aria-label="Field">${html}</select>`;
 }
 
 function builderHTML() {
   return `<div class="seg">
     <div class="seg-head">
       <input class="seg-name" data-name value="${esc(seg.name ?? '')}" placeholder="Untitled segment" maxlength="40" aria-label="Segment name">
-      <span class="seg-count" aria-live="polite"><b>${countOf(seg).toLocaleString('en-US')}</b> accounts in this segment, updated just now</span>
+      <span class="seg-count" aria-live="polite"><b>${countOf(seg).toLocaleString('en-US')}</b> people in this segment, updated just now</span>
     </div>
     <div class="seg-scroll">${groupHTML(seg, true)}</div>
     <div class="seg-foot mono"><span>Edits reshape the funnel behind this card</span><button data-reset>Reset</button></div>
   </div>`;
 }
 function groupHTML(g, root) {
+  const rel = g.type === 'has' ? g.rel : null;
   const rows = g.children.map((c) => c.type === 'group'
     ? `<div class="row nested" data-id="${c.id}">${groupHTML(c, false)}<button class="del" data-del="${c.id}" aria-label="Remove group">${TRASH}</button></div>`
-    : ruleHTML(c)).join('');
+    : c.type === 'has' ? hasHTML(c) : c.type === 'event' ? eventHTML(c) : ruleHTML(c, rel)).join('');
   const full = g.children.length >= (root ? MAX_RULES : MAX_GROUP);
   return `<div class="grp">
     <button class="conj" data-conj="${g.id}" title="Match all of these (and) or any of them (or)">${g.op === 'or' ? 'Or' : 'And'}<span>▾</span></button>
     <div class="rows">${rows || '<p class="empty">No rules yet, so everyone matches.</p>'}</div>
-    <div class="adds"><button data-add="${g.id}"${full ? ' disabled' : ''}>+ Add condition</button>${root ? `<button data-add-group${full ? ' disabled' : ''}>⊕ Add group</button>` : ''}</div>
+    <div class="adds"><button data-add="${g.id}"${full ? ' disabled' : ''}>+ Add ${rel ? `${RELATIONS[rel].label.split(' ').pop().toLowerCase()} condition` : 'condition'}</button>${root ? `<button data-add-group${full ? ' disabled' : ''}>⊕ Add group</button>` : ''}</div>
   </div>`;
 }
-function ruleHTML(c) {
+// "Has [Salesforce Account] where" + its own And/Or list of that record's fields
+function hasHTML(c) {
+  return `<div class="row nested has" data-id="${c.id}">
+    <div class="has-head"><select data-neg="${c.id}" aria-label="Has or has no"><option value="0"${c.neg ? '' : ' selected'}>Has</option><option value="1"${c.neg ? ' selected' : ''}>Has no</option></select>${fieldSelect(c)}<span>where</span></div>
+    ${groupHTML(c, false)}<button class="del" data-del="${c.id}" aria-label="Remove related record">${TRASH}</button></div>`;
+}
+// "All page views · clearbit.com · at least 10 times in the last Month"
+function eventHTML(c) {
+  const sel = (attr, opts, cur, label) => `<select data-${attr}="${c.id}" aria-label="${label}">${opts.map(([v, t]) => `<option value="${v}"${String(v) === String(cur) ? ' selected' : ''}>${t}</option>`).join('')}</select>`;
+  return `<div class="row event" data-id="${c.id}">${fieldSelect(c)}<input data-domain="${c.id}" value="${esc(c.domain ?? '')}" placeholder="any site" aria-label="Domain"><button class="del" data-del="${c.id}" aria-label="Remove event">${TRASH}</button>
+    <div class="ev-line">${sel('op', EVENT_OPS.map((o, i) => [i, o]), c.op, 'Comparison')}<input type="number" data-min="${c.id}" value="${c.min}" min="1" max="99" aria-label="Times"><span>times in the last</span>${sel('window', Object.keys(WINDOWS).map((w) => [w, w]), c.window, 'Time window')}</div></div>`;
+}
+function ruleHTML(c, rel = null) {
   const f = FIELDS[c.field], open = openVals === c.id;
-  const field = `<select data-field="${c.id}" aria-label="Field">${Object.entries(FIELDS).map(([k, v]) => `<option value="${k}"${k === c.field ? ' selected' : ''}>${v.label}</option>`).join('')}</select>`;
+  const field = fieldSelect(c, rel);
   const op = `<select data-op="${c.id}" aria-label="Operator">${f.ops.map((o, i) => `<option value="${i}"${i === c.op ? ' selected' : ''}>${o}</option>`).join('')}</select>`;
   let value, opts = '';
-  if (f.kind === 'text') value = `<input data-text="${c.id}" value="${esc(c.text ?? '')}" placeholder="e.g. growth" aria-label="Value">`;
+  if (f.kind === 'flag') value = '<span></span>';
+  else if (f.kind === 'text') value = `<input data-text="${c.id}" value="${esc(c.text ?? '')}" placeholder="e.g. growth" aria-label="Value">`;
   else if (f.kind === 'single') value = `<select data-value="${c.id}" aria-label="Value">${Object.keys(f.values).map((v) => `<option${v === c.value ? ' selected' : ''}>${v}</option>`).join('')}</select>`;
   else {
     value = `<button class="vals${open ? ' open' : ''}" data-vals="${c.id}" aria-expanded="${open}" aria-label="Values">${c.values.length ? c.values.map((v) => `<span class="pill">${esc(v)}</span>`).join('') : '<span class="ph">Choose…</span>'}</button>`;
@@ -421,7 +472,7 @@ function renderBuilder() {
   const top = el.querySelector('.seg-scroll').scrollTop, a = document.activeElement;
   let refocus = null;
   if (a && el.contains(a)) {
-    const attr = [...a.attributes].find((x) => /^data-(field|op|value|text|vals|toggle|conj|add|add-group|reset|name)$/.test(x.name));
+    const attr = [...a.attributes].find((x) => /^data-(field|op|value|text|vals|toggle|conj|add|add-group|reset|name|neg|domain|min|window)$/.test(x.name));
     if (attr) refocus = `[${attr.name}="${CSS.escape(attr.value)}"]${a.dataset.v ? `[data-v="${CSS.escape(a.dataset.v)}"]` : ''}`;
   }
   el.outerHTML = builderHTML();
@@ -458,7 +509,7 @@ card.addEventListener('click', (e) => {
   else if ((el = at('[data-add]'))) {
     const g = find(el.dataset.add).node, r = newRule(g);
     g.children.push(r);
-    openVals = FIELDS[r.field].kind === 'multi' ? r.id : null;
+    openVals = r.type === 'cond' && FIELDS[r.field].kind === 'multi' ? r.id : null;
     segChanged();
     card.querySelector(`.row[data-id="${r.id}"]`)?.scrollIntoView({ block: 'nearest' });
   } else if (at('[data-add-group]')) {
@@ -471,7 +522,7 @@ card.addEventListener('click', (e) => {
   } else if ((el = at('[data-del]'))) {
     const { node, parent } = find(el.dataset.del);
     parent.children = parent.children.filter((c) => c !== node);
-    if (parent !== seg && !parent.children.length) seg.children = seg.children.filter((c) => c !== parent); // drop emptied groups
+    if (parent !== seg && !parent.children.length) { const up = find(parent.id).parent; up.children = up.children.filter((c) => c !== parent); } // drop emptied groups
     segChanged();
   } else if ((el = at('[data-vals]'))) { openVals = openVals === el.dataset.vals ? null : el.dataset.vals; renderBuilder(); }
   else if ((el = at('[data-toggle]'))) {
@@ -486,14 +537,19 @@ card.addEventListener('change', (e) => {
     const r = find(d.field).node, fresh = ruleFor(r.id, e.target.value); // same id, so its funnel gate glides rather than jumps
     for (const k of Object.keys(r)) delete r[k];
     Object.assign(r, fresh);
-    openVals = FIELDS[r.field].kind === 'multi' ? r.id : null;
+    openVals = r.type === 'cond' && FIELDS[r.field].kind === 'multi' ? r.id : null;
     segChanged();
   } else if (d.op) { find(d.op).node.op = +e.target.value; segChanged(); }
   else if (d.value) { find(d.value).node.value = e.target.value; segChanged(); }
+  else if (d.neg) { find(d.neg).node.neg = +e.target.value; segChanged(); }
+  else if (d.window) { find(d.window).node.window = e.target.value; segChanged(); }
+  else if (d.min) { const n = find(d.min).node; n.min = Math.min(99, Math.max(1, Math.round(+e.target.value) || 1)); e.target.value = n.min; segChanged({ redraw: false }); }
 });
 card.addEventListener('input', (e) => {
   const d = e.target.dataset;
   if (d.text) { find(d.text).node.text = e.target.value; segChanged({ redraw: false }); }
+  else if (d.domain) { find(d.domain).node.domain = e.target.value; segChanged({ redraw: false }); }
+  else if (d.min && +e.target.value >= 1) { find(d.min).node.min = Math.min(99, Math.round(+e.target.value)); segChanged({ redraw: false }); }
   else if ('name' in d) { seg.name = e.target.value; segChanged({ redraw: false }); }
 });
 

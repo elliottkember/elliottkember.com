@@ -3,7 +3,7 @@
 // The rules come from the builder on the homepage card (shared/segment.js), so edits reshape
 // the funnel live: gates slide into place, the walls ease in or out, the counts tick over.
 import { TAU, clamp, smoothstep, css, begin, spacing, MONO, SANS } from './util.js';
-import { TOTAL, getSegment, gatesOf, passOf, summary, optionsOf } from '../../shared/segment.js?v=13';
+import { TOTAL, getSegment, gatesOf, passOf, summary, optionsOf } from '../../shared/segment.js?v=14';
 
 const HUE0 = 205, HUE1 = 300;
 
@@ -243,7 +243,7 @@ export function createFunnelScene() {
       const count = Math.round(gt.count * (1 + 0.004 * Math.sin(t * 1.3 + gt.i)));
       const total = !resultShown && gt === lastGate; // this count is the segment's size: say so
       ctx.fillStyle = total ? css(320, 95, 80) : 'rgba(255,255,255,.85)';
-      ctx.fillText(`${count.toLocaleString('en-US')}${total && !compact ? ' accounts' : ''}`, gx, countY);
+      ctx.fillText(`${count.toLocaleString('en-US')}${total && !compact ? ' people' : ''}`, gx, countY);
       ctx.font = `${10 * dpr}px ${MONO}`; spacing(ctx, 1.4 * dpr);
       ctx.fillStyle = css(330, 80, 70, 0.7);
       ctx.fillText(`−${Math.round((1 - gt.pass) * 100)}%`, gx, countY + 16 * dpr);
@@ -290,7 +290,7 @@ export function createFunnelScene() {
     if (resultShown) ctx.fillText(`SEGMENT · ${name.toUpperCase()}`, sx, cy - sh - 22 * dpr);
     ctx.font = `600 ${20 * dpr}px ${SANS}`; spacing(ctx, 0);
     ctx.fillStyle = '#fff';
-    if (resultShown) ctx.fillText(`${Math.round(lastGate ? lastGate.count : TOTAL).toLocaleString('en-US')} accounts`, sx, cy + sh + 34 * dpr);
+    if (resultShown) ctx.fillText(`${Math.round(lastGate ? lastGate.count : TOTAL).toLocaleString('en-US')} people`, sx, cy + sh + 34 * dpr);
 
     const hc = chips.find((c) => c.id === hover);
     if (hc) dropdown(ctx, hc);

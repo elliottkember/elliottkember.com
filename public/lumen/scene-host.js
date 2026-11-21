@@ -1,12 +1,12 @@
 // Owns the canvas and swaps between per-project scenes with a circular reveal.
 // Runs in the worker (OffscreenCanvas) or on the main thread as a fallback.
-import { createLedScene } from './scenes/led.js?v=13';
-import { createFunnelScene } from './scenes/funnel.js?v=13';
-import { createSyncScene } from './scenes/sync.js?v=13';
-import { createSiteScene } from './scenes/site.js?v=13';
-import { createHomeScene } from './scenes/home.js?v=13';
-import { TAU, makeCanvas } from './scenes/util.js?v=13';
-import { setSegment } from '../shared/segment.js?v=13';
+import { createLedScene } from './scenes/led.js?v=14';
+import { createFunnelScene } from './scenes/funnel.js?v=14';
+import { createSyncScene } from './scenes/sync.js?v=14';
+import { createSiteScene } from './scenes/site.js?v=14';
+import { createHomeScene } from './scenes/home.js?v=14';
+import { TAU, makeCanvas } from './scenes/util.js?v=14';
+import { setSegment } from '../shared/segment.js?v=14';
 
 const factories = {
   intro: createHomeScene,
